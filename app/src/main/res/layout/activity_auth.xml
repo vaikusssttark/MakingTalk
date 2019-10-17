@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AuthActivity">
+
+    <ImageView
+        android:id="@+id/login_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/login_background_desc"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/auth_background" />
+
+    <ImageView
+        android:id="@+id/register_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="20dp"
+        app:srcCompat="@drawable/main_icon"
+        android:contentDescription="@string/login_icon_desc" />
+
+    <LinearLayout
+        android:id="@+id/loginLayout"
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="30dp"
+        android:paddingTop="170dp"
+        android:paddingRight="30dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/open_sans_light"
+            android:paddingBottom="20dp"
+            android:text="@string/TW_login"
+            android:textSize="30sp" />
+
+        <EditText
+            android:id="@+id/ET_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/black"
+            android:ems="10"
+            android:hint="@string/ET_login_hint"
+            android:inputType="text"
+            android:textCursorDrawable="@color/start_btn"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:id="@+id/TW_login_auth_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-5dp"
+            android:textColor="@color/red"
+            android:fontFamily="@font/open_sans_light"
+            android:textSize="13sp"
+            android:visibility="invisible"/>
+
+        <EditText
+            android:id="@+id/ET_login_pwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/black"
+            android:ems="10"
+            android:hint="@string/ET_login_pwd"
+            android:inputType="textPassword"
+            android:textCursorDrawable="@color/start_btn"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:id="@+id/TW_pwd_auth_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-5dp"
+            android:textColor="@color/red"
+            android:fontFamily="@font/open_sans_light"
+            android:textSize="13sp"
+            android:visibility="invisible"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/login_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/style_reg_btn_action"
+        android:textSize="30sp"
+        android:fontFamily="@font/open_sans_light"
+        android:text="@string/BTN_login_text" />
+
+    <TextView
+        android:id="@+id/TW_login_to_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp"
+        android:textSize="20sp"
+        android:fontFamily="@font/open_sans_light"
+        android:text="@string/TW_login_to_reg_text"/>
+</RelativeLayout>

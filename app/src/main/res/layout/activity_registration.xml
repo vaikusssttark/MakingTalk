@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RegistrationActivity">
+
+    <ImageView
+        android:id="@+id/reg_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/reg_background_desc"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/auth_background" />
+
+    <ImageView
+        android:id="@+id/reg_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="20dp"
+        app:srcCompat="@drawable/main_icon"
+        android:contentDescription="@string/reg_icon_desc" />
+
+    <ImageView
+        android:id="@+id/return_to_login"
+        android:layout_width="20dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_alignParentTop="true"
+        app:srcCompat="@drawable/return_icon"
+        android:contentDescription="@string/return_to_login_desc" />
+
+    <LinearLayout
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:paddingTop="170dp"
+        android:paddingRight="30dp"
+        android:paddingLeft="30dp"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/TW_reg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:paddingBottom="20dp"
+            android:fontFamily="@font/open_sans_light"
+            android:text="@string/TW_reg"/>
+
+        <EditText
+            android:id="@+id/ET_login_reg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:backgroundTint="@color/black"
+            android:textCursorDrawable="@color/start_btn"
+            android:inputType="text"
+            android:hint="@string/ET_reg_hint" />
+
+        <TextView
+            android:id="@+id/TW_login_reg_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-5dp"
+            android:textColor="@color/red"
+            android:fontFamily="@font/open_sans_light"
+            android:textSize="13sp"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/ET_email_reg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:backgroundTint="@color/black"
+            android:textCursorDrawable="@color/start_btn"
+            android:inputType="textEmailAddress"
+            android:hint="@string/ET_reg_email_hint" />
+
+        <TextView
+            android:id="@+id/TW_email_reg_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-5dp"
+            android:textColor="@color/red"
+            android:fontFamily="@font/open_sans_light"
+            android:textSize="13sp"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/ET_pwd_reg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:textCursorDrawable="@color/start_btn"
+            android:backgroundTint="@color/black"
+            android:hint="@string/ET_reg_psw_hint"
+            android:inputType="textPassword" />
+
+        <TextView
+            android:id="@+id/TW_pwd_reg_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-5dp"
+            android:textColor="@color/red"
+            android:fontFamily="@font/open_sans_light"
+            android:textSize="13sp"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/ET_pwd2_reg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:backgroundTint="@color/black"
+            android:textCursorDrawable="@color/start_btn"
+            android:hint="@string/ET_pwd_repeat_hint"
+            android:inputType="textPassword" />
+
+
+
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/reg_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/style_reg_btn_action"
+        android:textSize="30sp"
+        android:fontFamily="@font/open_sans_light"
+        android:text="@string/BTN_reg" />
+</RelativeLayout>

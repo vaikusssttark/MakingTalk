@@ -1,18 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <ImageView
+        android:id="@+id/main_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/main_background"
+        android:contentDescription="@string/main_backgound" />
+
+    <ImageView
+        android:id="@+id/main_icon"
+        android:layout_width="192dp"
+        android:layout_height="493dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="200dp"
+        app:srcCompat="@drawable/main_icon"
+        android:contentDescription="@string/main_icon" />
+
+    <LinearLayout
+        android:id="@+id/start_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:padding="70dp"
+        android:orientation="horizontal">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/start_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/style_start_btn_action"
+            android:fontFamily="@font/open_sans_light"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:text="@string/start_btn_name"
+            android:textColor="@color/start_btn"
+            android:textSize="50sp" />
+    </LinearLayout>
+</RelativeLayout>
