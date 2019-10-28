@@ -1,5 +1,7 @@
 package site.makingtalk.requests;
 
+import android.app.Activity;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 

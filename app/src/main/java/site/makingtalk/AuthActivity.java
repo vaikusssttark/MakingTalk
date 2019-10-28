@@ -1,12 +1,10 @@
 package site.makingtalk;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,6 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -25,6 +28,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import site.makingtalk.requests.DBHelper;
+import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.User;
 
 
@@ -38,13 +42,35 @@ public class AuthActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
         set_fullscreen();
-
         setListeners();
         setLinkToRegWithAnimation();
+
+        if (!NetworkManager.isNetworkAvailable(getApplicationContext())) {
+            showNoNetworkConnectionDialog();
+        }
+
     }
+
+    private void showNoNetworkConnectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.no_network_connection, null))
+                .setNeutralButton(R.string.no_network_connection_button_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!NetworkManager.isNetworkAvailable(getApplicationContext()))
+                            showNoNetworkConnectionDialog();
+                    }
+                })
+                .setCancelable(false);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     private void setListeners() {
         loginErrorTW = findViewById(R.id.TW_login_auth_error);
@@ -95,7 +121,7 @@ public class AuthActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                    Toast.makeText(getApplicationContext(), "Ошибка подключения к БД", Toast.LENGTH_SHORT).show();
+                                    showNoNetworkConnectionDialog();
                                 }
                             });
                 } else {
@@ -110,7 +136,7 @@ public class AuthActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                    Toast.makeText(getApplicationContext(), "Ошибка подключения к БД", Toast.LENGTH_SHORT).show();
+                                    showNoNetworkConnectionDialog();
                                 }
                             });
                 }
@@ -157,7 +183,7 @@ public class AuthActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(AuthActivity.this, RegistrationActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                overridePendingTransition(R.anim.alpha_in_login, R.anim.alpha_out_login);
+                overridePendingTransition(R.anim.alpha_in_auth, R.anim.alpha_out_auth);
             }
         });
     }

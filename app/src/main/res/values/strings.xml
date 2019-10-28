@@ -1,11 +1,14 @@
 <resources>
+    //general
     <string name="app_name">Making Talk</string>
-    <string name="main_icon">main icon</string>
-    <string name="main_backgound">main_backgound</string>
+    <string name="backgound1_desc">Фон 1</string>
+    <string name="backgound2_desc">Фон 2</string>
+    <string name="main_icon_desc">Главная иконка</string>
+
+    //main activity
     <string name="start_btn_name">Старт</string>
 
-    <string name="reg_background_desc">reg_background</string>
-    <string name="reg_icon_desc">reg_icon</string>
+    //registration activity
     <string name="ET_reg_psw_hint">Пароль</string>
     <string name="TW_reg">Регистрация</string>
     <string name="ET_pwd_repeat_hint">Повторите пароль</string>
@@ -13,17 +16,21 @@
     <string name="ET_reg_hint">Логин</string>
     <string name="ET_reg_email_hint">Email</string>
 
-    <string name="login_background_desc">login_background_desc</string>
-    <string name="login_icon_desc">login_icon_desc</string>
-    <string name="TW_login">Авторизация</string>
-    <string name="ET_login_hint">Логин или Email</string>
-    <string name="ET_login_pwd">Пароль</string>
-    <string name="BTN_login_text">Вход</string>
-    <string name="TW_login_to_reg_text">Зарегистрироваться</string>
+    //auth activity
+    <string name="TW_auth">Авторизация</string>
+    <string name="ET_auth_hint">Логин или Email</string>
+    <string name="ET_auth_pwd">Пароль</string>
+    <string name="BTN_auth_text">Вход</string>
+    <string name="TW_from_auth_to_reg_text">Зарегистрироваться</string>
     <string name="TW_login_auth_empty_error">Введите логин или email</string>
     <string name="TW_pwd_auth_empty_error">Введите пароль</string>
     <string name="TW_login_auth_error">Неправильный логин/email или пароль</string>
-    <string name="return_to_login_desc">return_to_login</string>
+    <string name="return_to_auth_desc">Вернуться к аутентификации</string>
+
+    //no_network_connection activity
+    <string name="no_network_connection_message">Нет подключения к интернету :(</string>
+    <string name="no_network_connection_button_text">Обновить</string>
+    <string name="upgrade_no_network_connection_icon_desc">Иконка обновить при ошибке подключения к интернету</string>
 
 
 </resources>

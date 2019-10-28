@@ -10,9 +10,9 @@
         android:id="@+id/reg_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="@string/reg_background_desc"
+        android:contentDescription="@string/backgound2_desc"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/auth_background" />
+        app:srcCompat="@drawable/background2" />
 
     <ImageView
         android:id="@+id/reg_icon"
@@ -21,7 +21,7 @@
         android:layout_centerHorizontal="true"
         android:paddingTop="20dp"
         app:srcCompat="@drawable/main_icon"
-        android:contentDescription="@string/reg_icon_desc" />
+        android:contentDescription="@string/main_icon_desc" />
 
     <ImageView
         android:id="@+id/return_to_login"
@@ -31,7 +31,7 @@
         android:layout_marginStart="20dp"
         android:layout_alignParentTop="true"
         app:srcCompat="@drawable/return_icon"
-        android:contentDescription="@string/return_to_login_desc" />
+        android:contentDescription="@string/return_to_auth_desc" />
 
     <LinearLayout
         android:layout_width="400dp"

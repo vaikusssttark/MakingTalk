@@ -25,12 +25,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AuthActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                overridePendingTransition(R.anim.alpha_in_login, R.anim.alpha_out_login);
+                overridePendingTransition(R.anim.alpha_in_auth, R.anim.alpha_out_auth);
             }
         });
         setAndStartAnimation();
         set_fullscreen();
-
 
     }
 

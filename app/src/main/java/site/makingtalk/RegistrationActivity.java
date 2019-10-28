@@ -1,14 +1,17 @@
 package site.makingtalk;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -24,6 +27,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import site.makingtalk.requests.DBHelper;
+import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.SuccessResponse;
 import site.makingtalk.requests.User;
 
@@ -52,6 +56,7 @@ public class RegistrationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_registration);
 
         loginET = findViewById(R.id.ET_login_reg);
@@ -68,10 +73,30 @@ public class RegistrationActivity extends AppCompatActivity {
         setPwdListeners();
         setRegBtnListeners();
 
-
         set_fullscreen();
         setLinkToLoginWithAnimation();
 
+        if (!NetworkManager.isNetworkAvailable(getApplicationContext())) {
+            showNoNetworkConnectionDialog();
+        }
+
+
+    }
+
+    private void showNoNetworkConnectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.no_network_connection, null))
+                .setNeutralButton(R.string.no_network_connection_button_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!NetworkManager.isNetworkAvailable(getApplicationContext()))
+                            showNoNetworkConnectionDialog();
+                    }
+                })
+                .setCancelable(false);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void setRegBtnListeners() {
@@ -107,7 +132,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                    Toast.makeText(getApplicationContext(), "Отсутствует подключение к сети", Toast.LENGTH_SHORT).show();
+                                    showNoNetworkConnectionDialog();
                                 }
                             });
                 }
@@ -123,9 +148,12 @@ public class RegistrationActivity extends AppCompatActivity {
     private void setPwdListeners() {
         pwdET.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -174,7 +202,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                        Toast.makeText(getApplicationContext(), "Ошибка подключения к интернету", Toast.LENGTH_SHORT).show();
+                                        showNoNetworkConnectionDialog();
                                     }
                                 });
                     }
@@ -234,7 +262,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                    Toast.makeText(getApplicationContext(), "Ошибка подключения к интернету", Toast.LENGTH_SHORT).show();
+                                    showNoNetworkConnectionDialog();
                                 }
                             });
                 }
@@ -300,7 +328,7 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(RegistrationActivity.this, AuthActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                overridePendingTransition(R.anim.alpha_in_login, R.anim.alpha_out_login);
+                overridePendingTransition(R.anim.alpha_in_auth, R.anim.alpha_out_auth);
             }
         });
     }

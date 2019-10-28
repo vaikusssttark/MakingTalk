@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/main_background"
-        android:contentDescription="@string/main_backgound" />
+        android:src="@drawable/background1"
+        android:contentDescription="@string/backgound1_desc" />
 
     <ImageView
         android:id="@+id/main_icon"
@@ -21,7 +21,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="200dp"
         app:srcCompat="@drawable/main_icon"
-        android:contentDescription="@string/main_icon" />
+        android:contentDescription="@string/main_icon_desc" />
 
     <LinearLayout
         android:id="@+id/start_layout"
