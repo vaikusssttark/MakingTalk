@@ -1,11 +1,5 @@
 package site.makingtalk;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -21,6 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import java.util.regex.Pattern;
 
 import retrofit2.Call;
@@ -30,6 +29,10 @@ import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.SuccessResponse;
 import site.makingtalk.requests.User;
+import site.makingtalk.requests.UserAdditionalInfo;
+import site.makingtalk.requests.UserPrivacy;
+import site.makingtalk.secondary.AuthSharedPreferences;
+import site.makingtalk.secondary.PrivacySharedPreferences;
 
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -84,18 +87,23 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private void showNoNetworkConnectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity.this);
         LayoutInflater inflater = this.getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.no_network_connection, null))
-                .setNeutralButton(R.string.no_network_connection_button_text, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (!NetworkManager.isNetworkAvailable(getApplicationContext()))
-                            showNoNetworkConnectionDialog();
-                    }
-                })
+        View root = inflater.inflate(R.layout.no_network_connection, null);
+        builder.setView(root)
                 .setCancelable(false);
-        AlertDialog alertDialog = builder.create();
+        final AlertDialog alertDialog = builder.create();
+        Button update = root.findViewById(R.id.BTN_update);
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!NetworkManager.isNetworkAvailable(getApplicationContext())) {
+                    showNoNetworkConnectionDialog();
+                } else
+                    alertDialog.cancel();
+            }
+        });
+
         alertDialog.show();
     }
 
@@ -115,34 +123,122 @@ public class RegistrationActivity extends AppCompatActivity {
                     }
                 }
                 if (loginIsOK1 && loginIsOK2 && emailIsOK && pwdIsOK && pwdsMatch) {
-                    Toast.makeText(getApplicationContext(), "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
-                    DBHelper.getInstance()
-                            .getTesterAPI()
-                            .createUser(loginET.getText().toString(), emailET.getText().toString(), pwdET.getText().toString())
-                            .enqueue(new Callback<SuccessResponse>() {
-                                @Override
-                                public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                    SuccessResponse successResponse = response.body();
-                                    assert successResponse != null;
-                                    if (successResponse.getSuccess() == 1) {
-                                        Toast.makeText(getApplicationContext(), successResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                                    } else
-                                        Toast.makeText(getApplicationContext(), successResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-
-                                @Override
-                                public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                    showNoNetworkConnectionDialog();
-                                }
-                            });
+                    setValuesInDBAndPreferences();
                 }
-                System.out.println(loginIsOK1);
-                System.out.println(loginIsOK2);
-                System.out.println(emailIsOK);
-                System.out.println(pwdIsOK);
-                System.out.println(pwdsMatch);
             }
         });
+    }
+
+    private void setValuesInDBAndPreferences() {
+        Toast.makeText(getApplicationContext(), "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
+        DBHelper.getInstance()
+                .getUserMainInfoMakingTalkAPI()
+                .createUser(loginET.getText().toString(), emailET.getText().toString(), pwdET.getText().toString())
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        final SuccessResponse successResponse = response.body();
+                        assert successResponse != null;
+                        if (successResponse.getSuccess() == 1) {
+                            final String loginText = loginET.getText().toString();
+                            final String emailText = emailET.getText().toString();
+                            final String pwdText = pwdET.getText().toString();
+
+                            DBHelper.getInstance()
+                                    .getUserMainInfoMakingTalkAPI()
+                                    .getUserByLogin(loginText)
+                                    .enqueue(new Callback<User>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                                            final User user = response.body();
+                                            assert user != null;
+                                            if (user.getSuccess() == 1) {
+                                                AuthSharedPreferences.savePrefs(user.getUserId(), loginText, emailText, pwdText, getApplicationContext());
+
+                                                DBHelper.getInstance()
+                                                        .getUserAddInfoMakingTalkAPI()
+                                                        .createUserAddInfoRecord(AuthSharedPreferences.getId(getApplicationContext()))
+                                                        .enqueue(new Callback<SuccessResponse>() {
+                                                            @Override
+                                                            public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                                SuccessResponse successResponse = response.body();
+                                                                assert successResponse != null;
+                                                                if (successResponse.getSuccess() != 1) {
+                                                                    Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                                                showNoNetworkConnectionDialog();
+                                                            }
+                                                        });
+
+                                                DBHelper.getInstance()
+                                                        .getUserPrivacyMakingTalkAPI()
+                                                        .createPrivacyRecord(user.getUserId())
+                                                        .enqueue(new Callback<SuccessResponse>() {
+                                                            @Override
+                                                            public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                                SuccessResponse successResponse1 = response.body();
+                                                                assert successResponse1 != null;
+                                                                if (successResponse1.getSuccess() == 1) {
+
+                                                                    DBHelper.getInstance()
+                                                                            .getUserPrivacyMakingTalkAPI()
+                                                                            .getPrivacyById(user.getUserId())
+                                                                            .enqueue(new Callback<UserPrivacy>() {
+                                                                                @Override
+                                                                                public void onResponse(@NonNull Call<UserPrivacy> call, @NonNull Response<UserPrivacy> response) {
+                                                                                    UserPrivacy userPrivacy = response.body();
+                                                                                    assert userPrivacy != null;
+                                                                                    if (userPrivacy.getSuccess() == 1) {
+                                                                                        PrivacySharedPreferences.savePrefs(userPrivacy.getLoginVisibility(),
+                                                                                                userPrivacy.getEmailVisibility(),
+                                                                                                userPrivacy.getNameVisibility(),
+                                                                                                userPrivacy.getDescriptionVisibility(),
+                                                                                                userPrivacy.getProgressVisibility(),
+                                                                                                getApplicationContext());
+                                                                                        Intent intent = new Intent(RegistrationActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                                        startActivity(intent);
+                                                                                    } else
+                                                                                        Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                                                                                }
+
+                                                                                @Override
+                                                                                public void onFailure(@NonNull Call<UserPrivacy> call, @NonNull Throwable t) {
+                                                                                    showNoNetworkConnectionDialog();
+                                                                                }
+                                                                            });
+
+                                                                } else
+                                                                    Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                                                showNoNetworkConnectionDialog();
+                                                            }
+                                                        });
+
+                                            } else
+                                                Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                                            showNoNetworkConnectionDialog();
+                                        }
+                                    });
+                        } else
+                            Toast.makeText(getApplicationContext(), successResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
     }
 
     private void setPwdListeners() {
@@ -184,7 +280,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         emailIsOK = false;
                     } else {
                         DBHelper.getInstance()
-                                .getTesterAPI()
+                                .getUserMainInfoMakingTalkAPI()
                                 .getUserByEmail(emailET.getText().toString())
                                 .enqueue(new Callback<User>() {
                                     @Override
@@ -244,14 +340,12 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     DBHelper.getInstance()
-                            .getTesterAPI()
+                            .getUserMainInfoMakingTalkAPI()
                             .getUserByLogin(loginET.getText().toString())
                             .enqueue(new Callback<User>() {
                                 @Override
                                 public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                                    System.out.println(loginET.getText().toString());
                                     User user = response.body();
-                                    System.out.println(user);
                                     assert user != null;
                                     if (user.getSuccess() == 1) {
                                         setLoginErrorTW("Такой логин уже существует");
@@ -337,4 +431,5 @@ public class RegistrationActivity extends AppCompatActivity {
         Window w = getWindow();
         w.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
+
 }

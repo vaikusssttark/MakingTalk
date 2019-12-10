@@ -20,7 +20,7 @@
         android:layout_height="120dp"
         android:layout_centerHorizontal="true"
         android:paddingTop="20dp"
-        app:srcCompat="@drawable/main_icon"
+        app:srcCompat="@drawable/ic_main"
         android:contentDescription="@string/main_icon_desc" />
 
     <ImageView
@@ -30,7 +30,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:layout_alignParentTop="true"
-        app:srcCompat="@drawable/return_icon"
+        app:srcCompat="@drawable/ic_return_in_registration"
         android:contentDescription="@string/return_to_auth_desc" />
 
     <LinearLayout

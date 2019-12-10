@@ -1,6 +1,5 @@
 package site.makingtalk;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -18,9 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -30,6 +27,14 @@ import retrofit2.Response;
 import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.User;
+import site.makingtalk.requests.UserAdditionalInfo;
+import site.makingtalk.requests.UserLikedArticle;
+import site.makingtalk.requests.UserLikedArticles;
+import site.makingtalk.requests.UserPrivacy;
+import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
+import site.makingtalk.secondary.AuthSharedPreferences;
+import site.makingtalk.secondary.MD5;
+import site.makingtalk.secondary.PrivacySharedPreferences;
 
 
 public class AuthActivity extends AppCompatActivity {
@@ -56,18 +61,23 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void showNoNetworkConnectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
         LayoutInflater inflater = this.getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.no_network_connection, null))
-                .setNeutralButton(R.string.no_network_connection_button_text, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (!NetworkManager.isNetworkAvailable(getApplicationContext()))
-                            showNoNetworkConnectionDialog();
-                    }
-                })
+        View root = inflater.inflate(R.layout.no_network_connection, null);
+        builder.setView(root)
                 .setCancelable(false);
-        AlertDialog alertDialog = builder.create();
+        final AlertDialog alertDialog = builder.create();
+        Button update = root.findViewById(R.id.BTN_update);
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!NetworkManager.isNetworkAvailable(getApplicationContext())) {
+                    showNoNetworkConnectionDialog();
+                } else
+                    alertDialog.cancel();
+            }
+        });
+
         alertDialog.show();
     }
 
@@ -111,7 +121,7 @@ public class AuthActivity extends AppCompatActivity {
                     passwordErrorTW.setText(getResources().getText(R.string.TW_pwd_auth_empty_error));
                 } else if (Pattern.matches(emailPattern, loginET.getText())) {
                     DBHelper.getInstance()
-                            .getTesterAPI()
+                            .getUserMainInfoMakingTalkAPI()
                             .getUserByEmail(loginET.getText().toString())
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -126,7 +136,7 @@ public class AuthActivity extends AppCompatActivity {
                             });
                 } else {
                     DBHelper.getInstance()
-                            .getTesterAPI()
+                            .getUserMainInfoMakingTalkAPI()
                             .getUserByLogin(loginET.getText().toString())
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -148,15 +158,145 @@ public class AuthActivity extends AppCompatActivity {
         User user = response.body();
         assert user != null;
         if (user.getSuccess() == 1) {
-            if (Objects.equals(md5(passwordET.getText().toString()), user.getUserPassword())) {
-                Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_SHORT).show();
+            if (Objects.equals(MD5.encode(passwordET.getText().toString()), user.getUserPassword())) {
+                Intent intent = new Intent(AuthActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 setDefaultColorAndText();
+                String loginText = loginET.getText().toString();
+
+                if (Pattern.matches("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$", loginText)) {
+                    DBHelper.getInstance()
+                            .getUserMainInfoMakingTalkAPI()
+                            .getUserByEmail(loginText)
+                            .enqueue(new Callback<User>() {
+                                @Override
+                                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                                    User user = response.body();
+                                    assert user != null;
+                                    if (user.getSuccess() == 1) {
+                                        String pwdText = passwordET.getText().toString();
+                                        AuthSharedPreferences.savePrefs(user.getUserId(), user.getUserLogin(), user.getUserEmail(), pwdText, getApplicationContext());
+                                        saveUserAdditionalInfo(user);
+                                        savePrivacyPreferences(user);
+                                    } else {
+                                        savePreferencies();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                                    showNoNetworkConnectionDialog();
+                                }
+                            });
+                } else {
+                    savePreferencies();
+                }
+                startActivity(intent);
             } else {
                 setErrorColorAndText();
             }
         } else {
             setErrorColorAndText();
         }
+    }
+
+    private void savePreferencies() {
+        DBHelper.getInstance()
+                .getUserMainInfoMakingTalkAPI()
+                .getUserByLogin(loginET.getText().toString())
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                        User user = response.body();
+                        assert user != null;
+                        if (user.getSuccess() == 1) {
+                            String pwdText = passwordET.getText().toString();
+                            System.out.println(response.body());
+                            AuthSharedPreferences.savePrefs(user.getUserId(), user.getUserLogin(), user.getUserEmail(), pwdText, getApplicationContext());
+                            saveUserAdditionalInfo(user);
+                            savePrivacyPreferences(user);
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при обращении к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void saveUserAdditionalInfo(final User user) {
+        DBHelper.getInstance()
+                .getUserAddInfoMakingTalkAPI()
+                .getUserAddInfoById(user.getUserId())
+                .enqueue(new Callback<UserAdditionalInfo>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserAdditionalInfo> call, @NonNull Response<UserAdditionalInfo> response) {
+                        UserAdditionalInfo userAdditionalInfo = response.body();
+                        assert userAdditionalInfo != null;
+                        if (userAdditionalInfo.getSuccess() == 1) {
+                            AdditionalInfoSharedPreferences.savePrefs(
+                                    userAdditionalInfo.getUserName(),
+                                    userAdditionalInfo.getUserDescription(),
+                                    getApplicationContext());
+                            DBHelper.getInstance()
+                                    .getArticleListMakingTalkAPI()
+                                    .getUserLikedArticlesByUserId(user.getUserId())
+                                    .enqueue(new Callback<UserLikedArticles>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<UserLikedArticles> call, @NonNull Response<UserLikedArticles> response) {
+                                            UserLikedArticles userLikedArticles = response.body();
+                                            assert userLikedArticles != null;
+                                            if (userLikedArticles.getSuccess() == 1) {
+                                                System.out.println(userLikedArticles.toString());
+                                                for (UserLikedArticle articleId : userLikedArticles.getArticleIds()) {
+                                                    AdditionalInfoSharedPreferences.addArticleIdInLiked(articleId.getArticleId(),getApplicationContext());
+                                                }
+                                            }
+                                        }
+
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<UserLikedArticles> call, @NonNull Throwable t) {
+                                            showNoNetworkConnectionDialog();
+                                        }
+                                    });
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserAdditionalInfo> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void savePrivacyPreferences(User user) {
+        DBHelper.getInstance()
+                .getUserPrivacyMakingTalkAPI()
+                .getPrivacyById(user.getUserId())
+                .enqueue(new Callback<UserPrivacy>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserPrivacy> call, @NonNull Response<UserPrivacy> response) {
+                        UserPrivacy userPrivacy = response.body();
+                        assert userPrivacy != null;
+                        if (userPrivacy.getSuccess() == 1) {
+                            PrivacySharedPreferences.savePrefs(userPrivacy.getLoginVisibility(),
+                                    userPrivacy.getEmailVisibility(),
+                                    userPrivacy.getNameVisibility(),
+                                    userPrivacy.getDescriptionVisibility(),
+                                    userPrivacy.getProgressVisibility(),
+                                    getApplicationContext());
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserPrivacy> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
     }
 
     private void setErrorColorAndText() {
@@ -193,16 +333,5 @@ public class AuthActivity extends AppCompatActivity {
         w.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    private static String md5(@NonNull String s) {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("MD5");
-            byte[] messageDigest = md.digest(s.getBytes());
-            BigInteger num = new BigInteger(1, messageDigest);
-            return num.toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
 }

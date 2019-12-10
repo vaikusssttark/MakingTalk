@@ -20,7 +20,7 @@
         android:layout_height="120dp"
         android:layout_centerHorizontal="true"
         android:paddingTop="20dp"
-        app:srcCompat="@drawable/main_icon"
+        app:srcCompat="@drawable/ic_main"
         android:contentDescription="@string/main_icon_desc" />
 
     <LinearLayout

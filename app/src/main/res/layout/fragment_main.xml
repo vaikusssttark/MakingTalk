@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="56dp">
+    <LinearLayout
+        android:id="@+id/LL_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/linear_separator"
+        android:showDividers="middle"
+        android:dividerPadding="20dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="35dp"
+            android:layout_marginTop="35dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/IV_history"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_history" />
+
+            <TextView
+                android:id="@+id/TV_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/open_sans_light"
+                android:gravity="center_horizontal"
+                android:text="@string/name_history"
+                android:textSize="40sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/LL_animals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="35dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/IV_animals"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_animals" />
+
+            <TextView
+                android:id="@+id/TV_animals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/open_sans_light"
+                android:gravity="center_horizontal"
+                android:text="@string/animals"
+                android:textSize="40sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/LL_cinema"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="35dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/IV_cinema"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_cinema" />
+
+            <TextView
+                android:id="@+id/TV_cinema"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/open_sans_light"
+                android:gravity="center_horizontal"
+                android:text="@string/cinema"
+                android:textSize="40sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,13 +1,11 @@
 package site.makingtalk.requests;
 
-import android.app.Activity;
-
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DBHelper {
     private static DBHelper mInstance;
-    private static final String URL_BASE = "http://a0339016.xsph.ru/";
+    private static final String URL_BASE = "http://makingtalk.site/";
     private Retrofit mRetrofit;
 
     private DBHelper() {
@@ -24,8 +22,20 @@ public class DBHelper {
         return mInstance;
     }
 
-    public TestTesterAPI getTesterAPI() {
-        return mRetrofit.create(TestTesterAPI.class);
+    public UserMainInfoMakingTalkAPI getUserMainInfoMakingTalkAPI() {
+        return mRetrofit.create(UserMainInfoMakingTalkAPI.class);
+    }
+
+    public UserAddInfoMakingTalkAPI getUserAddInfoMakingTalkAPI() {
+        return mRetrofit.create(UserAddInfoMakingTalkAPI.class);
+    }
+
+    public UserPrivacyMakingTalkAPI getUserPrivacyMakingTalkAPI () {
+        return mRetrofit.create(UserPrivacyMakingTalkAPI.class);
+    }
+
+    public ArticleListMakingTalkAPI getArticleListMakingTalkAPI () {
+        return mRetrofit.create(ArticleListMakingTalkAPI.class);
     }
 }
 

@@ -32,5 +32,56 @@
     <string name="no_network_connection_button_text">Обновить</string>
     <string name="upgrade_no_network_connection_icon_desc">Иконка обновить при ошибке подключения к интернету</string>
 
+    //main_activity
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_logout">Выйти</string>
+
+    //main_menu
+    <string name="menu_main">Главная</string>
+    <string name="menu_profile">Профиль</string>
+    <string name="menu_recent">Недавнее</string>
+    <string name="menu_favourites">Избранное</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_support">Тех. поддержка</string>
+    <string name="menu_tools">Инструменты</string>
+
+    //main_fragment
+    <string name="name_history">История</string>
+    <string name="animals">Животные</string>
+    <string name="cinema">Кино</string>
+
+    //profile_fragment
+    <string name="TV_add_info_head_login">Логин:</string>
+    <string name="TV_add_info_head_email">E-mail:</string>
+    <string name="add_info_change">Изменить</string>
+    <string name="TV_add_info_head_name">Имя:</string>
+    <string name="TV_add_info_head_description">О себе:</string>
+    <string name="TV_add_info_head_privacy">Конфиденциальность:</string>
+    <string name="add_info_change_pwd">Изменить пароль</string>
+    <string name="CB_add_info_privacy_login">Логин виден другим пользователям</string>
+    <string name="CB_add_info_privacy_email">E-mail виден другим пользователям</string>
+    <string name="CB_add_info_privacy_name">Имя видно другим пользователям</string>
+    <string name="CB_add_info_privacy_description">Информация о себе видна другим пользователям</string>
+    <string name="CB_add_info_privacy_progress">Информация о достижениях видна другим пользователям</string>
+    <string name="dialog_profile_positive_btn">Готово</string>
+    <string name="dialog_profile_negative_btn">Закрыть</string>
+    <string name="ET_dialog_profile_description_hint">О себе</string>
+    <string name="TV_dialog_profile_description_text">Расскажите о себе :)</string>
+    <string name="ET_dialog_profile_email_hint">Новый E-mail</string>
+    <string name="TV_dialog_profile_email_text">Введите новый E-mail</string>
+    <string name="TV_dialog_profile_login_text">Введите новый логин</string>
+    <string name="ET_dialog_profile_login_hint">Новый логин</string>
+    <string name="TV_dialog_profile_name_text">Введите новое имя</string>
+    <string name="ET_dialog_profile_name_hint">Новое имя</string>
+    <string name="ET_dialog_profile_pwd1_hint">Введите старый пароль</string>
+    <string name="ET_dialog_profile_pwd2_hint">Введите новый пароль</string>
+    <string name="ET_dialog_profile_pwd3_hint">Повторите новый пароль</string>
+    <string name="TV_dialog_profile_pwd_text">Измените пароль</string>
+
 
 </resources>
