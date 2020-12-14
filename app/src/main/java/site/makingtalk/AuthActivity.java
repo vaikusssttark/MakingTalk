@@ -3,6 +3,7 @@ package site.makingtalk;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -111,6 +112,7 @@ public class AuthActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("http connection", "1");
                 if (loginET.getText().toString().equals("")) {
                     loginET.getBackground().mutate().setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.red), PorterDuff.Mode.SRC_ATOP);
                     loginErrorTW.setVisibility(View.VISIBLE);
@@ -120,20 +122,27 @@ public class AuthActivity extends AppCompatActivity {
                     passwordErrorTW.setVisibility(View.VISIBLE);
                     passwordErrorTW.setText(getResources().getText(R.string.TW_pwd_auth_empty_error));
                 } else if (Pattern.matches(emailPattern, loginET.getText())) {
-                    DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
-                            .getUserByEmail(loginET.getText().toString())
-                            .enqueue(new Callback<User>() {
-                                @Override
-                                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                                    authCheck(response);
-                                }
+                    Log.d("http connection", "2");
+                    try {
+                        DBHelper.getInstance()
+                                .getUserMainInfoMakingTalkAPI()
+                                .getUserByEmail(loginET.getText().toString())
+                                .enqueue(new Callback<User>() {
+                                    @Override
+                                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                                        authCheck(response);
+                                        Log.d("http connection", "asdasdasd");
+                                    }
 
-                                @Override
-                                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                    showNoNetworkConnectionDialog();
-                                }
-                            });
+                                    @Override
+                                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                                        Log.d("http connection", Objects.requireNonNull(t.getMessage()));
+                                        showNoNetworkConnectionDialog();
+                                    }
+                                });
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
                 } else {
                     DBHelper.getInstance()
                             .getUserMainInfoMakingTalkAPI()
@@ -147,6 +156,7 @@ public class AuthActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                                     showNoNetworkConnectionDialog();
+                                    Log.d("http connection", t.getMessage());
                                 }
                             });
                 }
@@ -155,6 +165,7 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void authCheck(@NonNull Response<User> response) {
+        Log.d("http connection", "3");
         User user = response.body();
         assert user != null;
         if (user.getSuccess() == 1) {
@@ -184,6 +195,7 @@ public class AuthActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                                    Log.d("http connection", t.getMessage());
                                     showNoNetworkConnectionDialog();
                                 }
                             });
@@ -250,7 +262,7 @@ public class AuthActivity extends AppCompatActivity {
                                             if (userLikedArticles.getSuccess() == 1) {
                                                 System.out.println(userLikedArticles.toString());
                                                 for (UserLikedArticle articleId : userLikedArticles.getArticleIds()) {
-                                                    AdditionalInfoSharedPreferences.addArticleIdInLiked(articleId.getArticleId(),getApplicationContext());
+                                                    AdditionalInfoSharedPreferences.addArticleIdInLiked(articleId.getArticleId(), getApplicationContext());
                                                 }
                                             }
                                         }
