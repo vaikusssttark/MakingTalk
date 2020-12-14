@@ -9,19 +9,17 @@
     // ArticleLayout
     <dimen name="article_layout_margin">20dp</dimen>
 
-    <dimen name="article_layout_tv_text_size">25sp</dimen>
+    <dimen name="article_layout_tv_text_size">15sp</dimen>
 
-    <dimen name="article_layout_like_view_start_margin">80dp</dimen>
-    <dimen name="article_layout_like_count_view_start_margin">230dp</dimen>
+    <dimen name="article_layout_like_view_start_margin">5dp</dimen>
+    <dimen name="article_layout_like_count_view_start_margin">15dp</dimen>
     <dimen name="article_layout_success_view_start_margin">270dp</dimen>
     <dimen name="article_layout_horizontal_layout_end_padding">20dp</dimen>
 
-    <dimen name="article_layout_iv_like_height">40dp</dimen>
-    <dimen name="article_layout_iv_like_weight">0.3</dimen>
+    <dimen name="article_layout_iv_like_height">20dp</dimen>
 
-    <dimen name="article_layout_tv_like_count_weight">0.1</dimen>
-    <dimen name="article_layout_tv_like_count_text_size">30sp</dimen>
+    <dimen name="article_layout_tv_like_count_text_size">15sp</dimen>
 
     <dimen name="article_layout_iv_success_height">30dp</dimen>
-    <dimen name="article_layout_iv_success_weight">0.3</dimen>
+
 </resources>

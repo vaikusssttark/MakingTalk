@@ -78,7 +78,6 @@ public class ArticleLayout extends LinearLayout {
         LayoutParams articleNameParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         articleName.setId(generateViewId());
         articleName.setLayoutParams(articleNameParams);
-        articleName.setTypeface(ResourcesCompat.getFont(context, R.font.open_sans_light));
         articleName.setTextSize(res.getDimension(R.dimen.article_layout_tv_text_size) / 2);
     }
 
