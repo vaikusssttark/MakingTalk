@@ -2,6 +2,7 @@ package site.makingtalk.layouts_gen;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -90,7 +91,9 @@ public class ArticleLayout extends LinearLayout {
     private void setLikeViewParams(Context context, Resources res) {
         likeView = new ImageView(context);
         likeView.setId(generateViewId());
-        likeView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_unlike));
+        Log.d("likeID", Integer.toString(likeView.getId()));
+        likeView.setImageResource(R.drawable.ic_unlike);
+        likeView.setTag(R.drawable.ic_unlike);
         LayoutParams likeViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, (int) res.getDimension(R.dimen.article_layout_iv_like_height));
         likeViewParams.setMarginStart((int) res.getDimension(R.dimen.article_layout_like_view_start_margin));
         likeView.setLayoutParams(likeViewParams);

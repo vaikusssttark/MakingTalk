@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -83,13 +86,14 @@ public class ArticleListActivity extends AppCompatActivity {
                             ArrayList<Integer> likedArticlesId = AdditionalInfoSharedPreferences.getLikedArticlesIds(getApplicationContext());
                             if (likedArticlesId != null) {
                                 if (likedArticlesId.contains(article.getArticleId())) {
-                                    isLike = true;
-                                    articleLayout.getLikeView().setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_like));
+                                    articleLayout.getLikeView().setImageResource(R.drawable.ic_like);
+                                    articleLayout.setTag(R.drawable.ic_like);
                                 }
                             }
                             articleLayout.getArticleName().setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    Log.d("article", Integer.toString(articleLayout.getArticleName().getId()));
                                     Intent intent = new Intent(getApplicationContext(), ArticleActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     intent.putExtra("article_id", articleId);
                                     intent.putExtra("theme", getIntent().getStringExtra("theme"));
@@ -100,8 +104,10 @@ public class ArticleListActivity extends AppCompatActivity {
                             articleLayout.getLikeView().setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    if (isLike) {
+                                    Log.d("like", Integer.toString(v.getId()));
+                                    final int likeViewId = v.getId();
 
+                                    if ((int) v.getTag() == R.drawable.ic_like) {
                                         final int likesCount = Integer.parseInt(articleLayout.getLikeCountView().getText().toString()) - 1;
                                         isLike = false;
                                         DBHelper.getInstance()
@@ -110,10 +116,13 @@ public class ArticleListActivity extends AppCompatActivity {
                                                 .enqueue(new Callback<SuccessResponse>() {
                                                     @Override
                                                     public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+
                                                         SuccessResponse successResponse = response.body();
                                                         assert successResponse != null;
                                                         if (successResponse.getSuccess() == 1) {
-                                                            articleLayout.getLikeView().setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_unlike));
+                                                            ImageView likeView = (ImageView) findViewById(likeViewId);
+                                                            likeView.setImageResource(R.drawable.ic_unlike);
+                                                            likeView.setTag(R.drawable.ic_unlike);
                                                             articleLayout.getLikeCountView().setText(Integer.toString(likesCount));
                                                             DBHelper.getInstance()
                                                                     .getArticleListMakingTalkAPI()
@@ -155,7 +164,9 @@ public class ArticleListActivity extends AppCompatActivity {
                                                         SuccessResponse successResponse = response.body();
                                                         assert successResponse != null;
                                                         if (successResponse.getSuccess() == 1) {
-                                                            articleLayout.getLikeView().setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_like));
+                                                            ImageView likeView = (ImageView) findViewById(likeViewId);
+                                                            likeView.setImageResource(R.drawable.ic_like);
+                                                            likeView.setTag(R.drawable.ic_like);
                                                             articleLayout.getLikeCountView().setText(Integer.toString(likesCount));
                                                             DBHelper.getInstance()
                                                                     .getArticleListMakingTalkAPI()
