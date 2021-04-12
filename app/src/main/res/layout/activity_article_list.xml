@@ -24,16 +24,18 @@
         android:textSize="30sp"
         android:fontFamily="@font/open_sans_light"
         />
-
     <LinearLayout
-        android:id="@+id/article_main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:divider="@drawable/linear_separator"
-        android:showDividers="middle"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="120dp">
-    </LinearLayout>
+        android:showDividers="middle">
+        <LinearLayout
+            android:id="@+id/article_main_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
 
+            android:layout_marginTop="120dp">
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

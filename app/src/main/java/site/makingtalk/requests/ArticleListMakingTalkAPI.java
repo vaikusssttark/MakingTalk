@@ -17,6 +17,9 @@ public interface ArticleListMakingTalkAPI {
     @GET("articles/get_user_liked_articles_by_user_id.php")
     Call<UserLikedArticles> getUserLikedArticlesByUserId(@Query("user_id") int userId);
 
+    @GET("articles/get_liked_articles.php")
+    Call<LikedArticles> getLikedArticles();
+
     @FormUrlEncoded
     @POST("articles/update_article_likes_count.php")
     Call<SuccessResponse> updateArticleLikesCount(@Field("article_id") int articleId, @Field("likes_count") int likesCount);

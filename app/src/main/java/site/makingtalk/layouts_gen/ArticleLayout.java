@@ -52,24 +52,16 @@ public class ArticleLayout extends LinearLayout {
         Resources res = getResources();
         setMainLayoutParams(context, res);
 
+
         setArticleNameParams(context, res);
-
         this.addView(articleName);
-
         setItemsLayoutParams(context, res);
-
         setLikeViewParams(context, res);
-
         itemsLayout.addView(likeView);
-
         setLikeCountViewParams(context, res);
-
         itemsLayout.addView(likeCountView);
-
         setSuccessViewParams(context, res);
-
         itemsLayout.addView(successView);
-
         this.addView(itemsLayout);
 
     }
@@ -102,6 +94,7 @@ public class ArticleLayout extends LinearLayout {
     private void setLikeCountViewParams(Context context, Resources res) {
         likeCountView = new TextView(context);
         likeCountView.setId(generateViewId());
+        likeCountView.setTag(likeView.getId());
         likeCountView.setTextSize(res.getDimensionPixelSize(R.dimen.article_layout_tv_like_count_text_size) / 2);
         likeCountView.setTypeface(ResourcesCompat.getFont(context, R.font.open_sans_light));
         LayoutParams likeCountParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
