@@ -1,9 +1,9 @@
-package site.makingtalk.requests;
+package site.makingtalk.requests.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class LikedArticle {
+public class UserLikedArticle {
     @SerializedName("article_id")
     @Expose
     private int articleId;

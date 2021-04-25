@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -18,14 +19,19 @@ import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import site.makingtalk.requests.Article;
-import site.makingtalk.requests.Articles;
+import site.makingtalk.requests.entities.Article;
 import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
+import site.makingtalk.requests.entities.ArticleJoined;
+import site.makingtalk.requests.entities.ArticleParams;
+import site.makingtalk.requests.entities.ArticlesJoined;
+import site.makingtalk.requests.entities.ArticlesParams;
+import site.makingtalk.requests.entities.SuccessResponse;
 
 public class ArticleActivity extends AppCompatActivity {
 
     private ImageView returnToArticleList;
+    private ArticleJoined article;
     private TextView title;
     private TextView text;
     private Button successBtn;
@@ -59,7 +65,7 @@ public class ArticleActivity extends AppCompatActivity {
         });
 
         DBHelper.getInstance()
-                .getArticleListMakingTalkAPI()
+                .getArticleListAPI()
                 .getArticleById(getIntent().getIntExtra("article_id", 0))
                 .enqueue(new Callback<Article>() {
                     @Override
@@ -83,10 +89,54 @@ public class ArticleActivity extends AppCompatActivity {
         successBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ArticleActivity.this, ArticleListActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("theme", getIntent().getStringExtra("theme"));
-                intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
-                startActivity(intent);
+                DBHelper.getInstance()
+                        .getArticleListAPI()
+                        .getJoinedArticleById(getIntent().getIntExtra("article_id", 0))
+                        .enqueue(new Callback<ArticleJoined>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ArticleJoined> call, @NonNull Response<ArticleJoined> response) {
+                                assert response.body() != null;
+                                if (response.body().getSuccess() == 1) {
+                                    article = response.body();
+                                    int article_id = getIntent().getIntExtra("article_id", 0);
+                                    float i = (((float)article.getViewsFullCount() + 1) / article.getViewsCount()) * 100;
+                                    int articleViewsFullPerc = Math.round(i);
+                                    Log.d("myLog", "artId = " + article_id + ", viewsFullCount = " + article.getViewsFullCount() + ", perc = " + ((article.getViewsFullCount() + 1) / article.getViewsCount()) * 100 + " " + (article.getViewsFullCount() + 1) + " " + article.getViewsCount() + " " + i);
+                                    DBHelper.getInstance()
+                                            .getArticleParamsAPI()
+                                            .updateArticleViewsFullCount(article_id, article.getViewsFullCount() + 1, articleViewsFullPerc)
+                                            .enqueue(new Callback<SuccessResponse>() {
+                                                @Override
+                                                public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                    assert response.body() != null;
+                                                    if (response.body().getSuccess() == 1) {
+                                                        Intent intent = new Intent(ArticleActivity.this, ArticleListActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                        intent.putExtra("theme", getIntent().getStringExtra("theme"));
+                                                        intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
+                                                        startActivity(intent);
+                                                    } else {
+                                                        Log.d("myServerError", response.body().getMessage());
+                                                        showDialogNoNetworkConnection();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                                    showDialogNoNetworkConnection();
+                                                }
+                                            });
+                                } else {
+                                    Log.d("myServerError", response.body().getMessage());
+                                    showDialogNoNetworkConnection();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ArticleJoined> call, @NonNull Throwable t) {
+                                showDialogNoNetworkConnection();
+                            }
+                        });
+
             }
         });
     }

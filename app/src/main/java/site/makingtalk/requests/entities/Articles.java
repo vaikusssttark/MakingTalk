@@ -1,7 +1,9 @@
-package site.makingtalk.requests;
+package site.makingtalk.requests.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.Arrays;
 
 public class Articles {
     @SerializedName("articles")
@@ -15,6 +17,7 @@ public class Articles {
     private String message;
 
     public Article[] getArticleArray() {
+        Arrays.sort(articles);
         return articles;
     }
 

@@ -1,4 +1,4 @@
-package site.makingtalk.requests;
+package site.makingtalk.requests.api;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -6,8 +6,10 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import site.makingtalk.requests.entities.SuccessResponse;
+import site.makingtalk.requests.entities.UserAdditionalInfo;
 
-public interface UserAddInfoMakingTalkAPI {
+public interface UserAddInfoAPI {
     @FormUrlEncoded
     @POST("users/additional/create_add_info_record.php")
     Call<SuccessResponse> createUserAddInfoRecord(@Field("user_id") int userId);

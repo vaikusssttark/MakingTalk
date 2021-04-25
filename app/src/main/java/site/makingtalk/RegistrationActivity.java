@@ -27,10 +27,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
-import site.makingtalk.requests.SuccessResponse;
-import site.makingtalk.requests.User;
-import site.makingtalk.requests.UserAdditionalInfo;
-import site.makingtalk.requests.UserPrivacy;
+import site.makingtalk.requests.entities.SuccessResponse;
+import site.makingtalk.requests.entities.User;
+import site.makingtalk.requests.entities.UserPrivacy;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.PrivacySharedPreferences;
 
@@ -132,7 +131,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private void setValuesInDBAndPreferences() {
         Toast.makeText(getApplicationContext(), "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
         DBHelper.getInstance()
-                .getUserMainInfoMakingTalkAPI()
+                .getUserMainInfoAPI()
                 .createUser(loginET.getText().toString(), emailET.getText().toString(), pwdET.getText().toString())
                 .enqueue(new Callback<SuccessResponse>() {
                     @Override
@@ -145,7 +144,7 @@ public class RegistrationActivity extends AppCompatActivity {
                             final String pwdText = pwdET.getText().toString();
 
                             DBHelper.getInstance()
-                                    .getUserMainInfoMakingTalkAPI()
+                                    .getUserMainInfoAPI()
                                     .getUserByLogin(loginText)
                                     .enqueue(new Callback<User>() {
                                         @Override
@@ -156,7 +155,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                                 AuthSharedPreferences.savePrefs(user.getUserId(), loginText, emailText, pwdText, getApplicationContext());
 
                                                 DBHelper.getInstance()
-                                                        .getUserAddInfoMakingTalkAPI()
+                                                        .getUserAddInfoAPI()
                                                         .createUserAddInfoRecord(AuthSharedPreferences.getId(getApplicationContext()))
                                                         .enqueue(new Callback<SuccessResponse>() {
                                                             @Override
@@ -175,7 +174,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                                         });
 
                                                 DBHelper.getInstance()
-                                                        .getUserPrivacyMakingTalkAPI()
+                                                        .getUserPrivacyAPI()
                                                         .createPrivacyRecord(user.getUserId())
                                                         .enqueue(new Callback<SuccessResponse>() {
                                                             @Override
@@ -185,7 +184,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                                                 if (successResponse1.getSuccess() == 1) {
 
                                                                     DBHelper.getInstance()
-                                                                            .getUserPrivacyMakingTalkAPI()
+                                                                            .getUserPrivacyAPI()
                                                                             .getPrivacyById(user.getUserId())
                                                                             .enqueue(new Callback<UserPrivacy>() {
                                                                                 @Override
@@ -280,7 +279,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         emailIsOK = false;
                     } else {
                         DBHelper.getInstance()
-                                .getUserMainInfoMakingTalkAPI()
+                                .getUserMainInfoAPI()
                                 .getUserByEmail(emailET.getText().toString())
                                 .enqueue(new Callback<User>() {
                                     @Override
@@ -340,7 +339,7 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
+                            .getUserMainInfoAPI()
                             .getUserByLogin(loginET.getText().toString())
                             .enqueue(new Callback<User>() {
                                 @Override

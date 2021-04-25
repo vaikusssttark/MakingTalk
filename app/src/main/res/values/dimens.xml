@@ -10,11 +10,13 @@
     <dimen name="article_layout_margin">20dp</dimen>
 
     <dimen name="article_layout_tv_text_size">15sp</dimen>
+    <dimen name="theme_layout_tv_text_size">23sp</dimen>
 
-    <dimen name="article_layout_like_view_start_margin">5dp</dimen>
-    <dimen name="article_layout_like_count_view_start_margin">15dp</dimen>
-    <dimen name="article_layout_success_view_start_margin">270dp</dimen>
-    <dimen name="article_layout_horizontal_layout_end_padding">20dp</dimen>
+    <dimen name="dim5dp">5dp</dimen>
+    <dimen name="dim15dp">15dp</dimen>
+    <dimen name="dim30dp">28dp</dimen>
+    <dimen name="dim270dp">270dp</dimen>
+    <dimen name="dim20dp">20dp</dimen>
 
     <dimen name="article_layout_iv_like_height">20dp</dimen>
 

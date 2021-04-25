@@ -1,4 +1,4 @@
-package site.makingtalk.requests;
+package site.makingtalk.requests.api;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -6,8 +6,10 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import site.makingtalk.requests.entities.SuccessResponse;
+import site.makingtalk.requests.entities.UserPrivacy;
 
-public interface UserPrivacyMakingTalkAPI {
+public interface UserPrivacyAPI {
     @FormUrlEncoded
     @POST("users/privacy/create_privacy_record.php")
     Call<SuccessResponse> createPrivacyRecord(@Field("user_id") int userId);

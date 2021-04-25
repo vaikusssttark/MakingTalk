@@ -1,9 +1,9 @@
-package site.makingtalk.requests;
+package site.makingtalk.requests.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Article {
+public class Article implements Comparable<Article> {
     @SerializedName("id")
     @Expose
     private int articleId;
@@ -16,9 +16,9 @@ public class Article {
     @Expose
     private String articleText;
 
-    @SerializedName("likes_count")
+    @SerializedName("rang")
     @Expose
-    private int likesCount;
+    private int rang;
 
     @SerializedName("theme_id")
     @Expose
@@ -31,6 +31,11 @@ public class Article {
     @SerializedName("message")
     @Expose
     private String message;
+
+    @Override
+    public int compareTo(Article article) {
+        return this.rang - article.rang;
+    }
 
 
     public int getArticleId() {
@@ -45,8 +50,8 @@ public class Article {
         return articleText;
     }
 
-    public int getLikesCount() {
-        return likesCount;
+    public int getRang() {
+        return rang;
     }
 
     public int getThemeId() {

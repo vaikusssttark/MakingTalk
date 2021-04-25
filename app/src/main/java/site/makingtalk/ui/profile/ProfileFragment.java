@@ -30,8 +30,8 @@ import retrofit2.Response;
 import site.makingtalk.R;
 import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
-import site.makingtalk.requests.SuccessResponse;
-import site.makingtalk.requests.User;
+import site.makingtalk.requests.entities.SuccessResponse;
+import site.makingtalk.requests.entities.User;
 import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.MD5;
@@ -91,7 +91,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_profile, container, false);
-        applicationContext = Objects.requireNonNull(getActivity()).getApplicationContext();
+        applicationContext = requireActivity().getApplicationContext();
         setDefaultSettings(applicationContext);
 
         setCBLoginListener();
@@ -308,7 +308,7 @@ public class ProfileFragment extends Fragment {
 
                     if (pwd2isOk) {
                         DBHelper.getInstance()
-                                .getUserMainInfoMakingTalkAPI()
+                                .getUserMainInfoAPI()
                                 .updateUserPassword(AuthSharedPreferences.getId(applicationContext), pwd2)
                                 .enqueue(new Callback<SuccessResponse>() {
                                     @Override
@@ -343,7 +343,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStylePwd1(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd1.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd1.setVisibility(View.VISIBLE);
         tv_error_pwd1.setText(s);
@@ -351,7 +351,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStylePwd1() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd1.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd1.setVisibility(View.INVISIBLE);
         tv_error_pwd1.setText("");
@@ -359,7 +359,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStylePwd2(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd2.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd2.setTextColor(ContextCompat.getColor(applicationContext, R.color.red));
         tv_error_pwd2.setVisibility(View.VISIBLE);
@@ -368,7 +368,7 @@ public class ProfileFragment extends Fragment {
 
     private void setMidStylePwd2(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd2.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.start_btn), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd2.setTextColor(ContextCompat.getColor(applicationContext, R.color.start_btn));
         tv_error_pwd2.setVisibility(View.VISIBLE);
@@ -377,7 +377,7 @@ public class ProfileFragment extends Fragment {
 
     private void setGoodStylePwd2(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd2.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.green), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd2.setTextColor(ContextCompat.getColor(applicationContext, R.color.green));
         tv_error_pwd2.setVisibility(View.VISIBLE);
@@ -386,7 +386,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStylePwd2() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd2.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd2.setVisibility(View.INVISIBLE);
         tv_error_pwd2.setText("");
@@ -394,7 +394,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStylePwd3(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd3.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd3.setVisibility(View.VISIBLE);
         tv_error_pwd3.setText(s);
@@ -402,7 +402,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStylePwd3() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_pwd3.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_pwd3.setVisibility(View.INVISIBLE);
         tv_error_pwd3.setText("");
@@ -427,7 +427,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String description = et_description.getText().toString();
-                final Context applicationContext = Objects.requireNonNull(getActivity()).getApplicationContext();
+                final Context applicationContext = requireActivity().getApplicationContext();
                 et_description.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -448,7 +448,7 @@ public class ProfileFragment extends Fragment {
                     setErrorStyleDescription("Слишком длинный текст");
                 } else {
                     DBHelper.getInstance()
-                            .getUserAddInfoMakingTalkAPI()
+                            .getUserAddInfoAPI()
                             .updateUserAddInfoDescription(AuthSharedPreferences.getId(applicationContext), description)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -482,7 +482,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStyleDescription(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_description.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_description.setVisibility(View.VISIBLE);
         tv_error_description.setText(s);
@@ -490,7 +490,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStyleDescription() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_description.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_description.setVisibility(View.INVISIBLE);
         tv_error_description.setText("");
@@ -515,7 +515,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String name = et_name.getText().toString();
-                final Context applicationContext = Objects.requireNonNull(getActivity()).getApplicationContext();
+                final Context applicationContext = requireActivity().getApplicationContext();
                 et_name.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -536,7 +536,7 @@ public class ProfileFragment extends Fragment {
                     setErrorStyleName("Слишком длинное имя");
                 } else {
                     DBHelper.getInstance()
-                            .getUserAddInfoMakingTalkAPI()
+                            .getUserAddInfoAPI()
                             .updateUserAddInfoName(AuthSharedPreferences.getId(applicationContext), name)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -570,7 +570,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStyleName(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_name.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_name.setVisibility(View.VISIBLE);
         tv_error_name.setText(s);
@@ -578,7 +578,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStyleName() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_name.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_name.setVisibility(View.INVISIBLE);
         tv_error_name.setText("");
@@ -603,7 +603,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String email = et_email.getText().toString();
-                final Context applicationContext = Objects.requireNonNull(getActivity()).getApplicationContext();
+                final Context applicationContext = requireActivity().getApplicationContext();
                 et_email.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -624,7 +624,7 @@ public class ProfileFragment extends Fragment {
                     setErrorStyleEmail("E-mail указан неверно");
                 } else {
                     DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
+                            .getUserMainInfoAPI()
                             .getUserByEmail(email)
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -635,7 +635,7 @@ public class ProfileFragment extends Fragment {
                                         setErrorStyleEmail("Такой E-mail уже зарегистрирован");
                                     } else {
                                         DBHelper.getInstance()
-                                                .getUserMainInfoMakingTalkAPI()
+                                                .getUserMainInfoAPI()
                                                 .updateUserEmail(AuthSharedPreferences.getId(applicationContext), email)
                                                 .enqueue(new Callback<SuccessResponse>() {
                                                     @Override
@@ -677,7 +677,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStyleEmail(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_email.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_email.setVisibility(View.VISIBLE);
         tv_error_email.setText(s);
@@ -685,7 +685,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStyleEmail() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_email.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_email.setVisibility(View.INVISIBLE);
         tv_error_email.setText("");
@@ -710,7 +710,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String login = et_login.getText().toString();
-                final Context context = Objects.requireNonNull(getActivity()).getApplicationContext();
+                final Context context = requireActivity().getApplicationContext();
                 et_login.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -735,7 +735,7 @@ public class ProfileFragment extends Fragment {
                     setErrorStyleLogin("Только латиница и цифры");
                 } else {
                     DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
+                            .getUserMainInfoAPI()
                             .getUserByLogin(login)
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -747,7 +747,7 @@ public class ProfileFragment extends Fragment {
                                     } else {
 
                                         DBHelper.getInstance()
-                                                .getUserMainInfoMakingTalkAPI()
+                                                .getUserMainInfoAPI()
                                                 .updateUserLogin(AuthSharedPreferences.getId(context), login)
                                                 .enqueue(new Callback<SuccessResponse>() {
                                                     @Override
@@ -790,7 +790,7 @@ public class ProfileFragment extends Fragment {
 
     private void setErrorStyleLogin(String s) {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_login.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
         tv_error_login.setVisibility(View.VISIBLE);
         tv_error_login.setText(s);
@@ -798,7 +798,7 @@ public class ProfileFragment extends Fragment {
 
     private void setDefaultStyleLogin() {
         assert getParentFragment() != null;
-        Context context = Objects.requireNonNull(getParentFragment().getActivity()).getApplicationContext();
+        Context context = requireParentFragment().getActivity().getApplicationContext();
         et_login.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
         tv_error_login.setVisibility(View.INVISIBLE);
         tv_error_login.setText("");
@@ -820,7 +820,7 @@ public class ProfileFragment extends Fragment {
                     else
                         value = 0;
                     DBHelper.getInstance()
-                            .getUserPrivacyMakingTalkAPI()
+                            .getUserPrivacyAPI()
                             .updateLoginVisibility(AuthSharedPreferences.getId(applicationContext), value)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -857,7 +857,7 @@ public class ProfileFragment extends Fragment {
                     else
                         value = 0;
                     DBHelper.getInstance()
-                            .getUserPrivacyMakingTalkAPI()
+                            .getUserPrivacyAPI()
                             .updateEmailVisibility(AuthSharedPreferences.getId(applicationContext), value)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -894,7 +894,7 @@ public class ProfileFragment extends Fragment {
                     else
                         value = 0;
                     DBHelper.getInstance()
-                            .getUserPrivacyMakingTalkAPI()
+                            .getUserPrivacyAPI()
                             .updateNameVisibility(AuthSharedPreferences.getId(applicationContext), value)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -931,7 +931,7 @@ public class ProfileFragment extends Fragment {
                     else
                         value = 0;
                     DBHelper.getInstance()
-                            .getUserPrivacyMakingTalkAPI()
+                            .getUserPrivacyAPI()
                             .updateDescriptionVisibility(AuthSharedPreferences.getId(applicationContext), value)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override
@@ -968,7 +968,7 @@ public class ProfileFragment extends Fragment {
                     else
                         value = 0;
                     DBHelper.getInstance()
-                            .getUserPrivacyMakingTalkAPI()
+                            .getUserPrivacyAPI()
                             .updateProgressVisibility(AuthSharedPreferences.getId(applicationContext), value)
                             .enqueue(new Callback<SuccessResponse>() {
                                 @Override

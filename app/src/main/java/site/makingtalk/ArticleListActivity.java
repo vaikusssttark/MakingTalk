@@ -3,15 +3,12 @@ package site.makingtalk;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -26,15 +23,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import site.makingtalk.layouts_gen.ArticleLayout;
-import site.makingtalk.requests.Article;
-import site.makingtalk.requests.Articles;
+import site.makingtalk.requests.entities.ArticleJoined;
+import site.makingtalk.requests.entities.ArticleParams;
 import site.makingtalk.requests.DBHelper;
-import site.makingtalk.requests.LikedArticle;
-import site.makingtalk.requests.LikedArticles;
 import site.makingtalk.requests.NetworkManager;
-import site.makingtalk.requests.SuccessResponse;
-import site.makingtalk.requests.UserLikedArticle;
-import site.makingtalk.requests.UserLikedArticles;
+import site.makingtalk.requests.entities.ArticlesJoined;
+import site.makingtalk.requests.entities.SuccessResponse;
 import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 
@@ -44,6 +38,7 @@ public class ArticleListActivity extends AppCompatActivity {
     private LinearLayout articleMainLayout;
     private ImageView returnToMain;
     private TextView themeName;
+    private ArticleParams[] articlesParams;
     private int likesCount;
     private HashMap<Integer, Integer> likedArticlesTWTag = new HashMap<>();
     private ArticleLayout articleLayout;
@@ -76,15 +71,16 @@ public class ArticleListActivity extends AppCompatActivity {
     private void setArticles() {
         articleMainLayout = findViewById(R.id.article_main_layout);
         System.out.println(AuthSharedPreferences.getId(getApplicationContext()));
+
         DBHelper.getInstance()
-                .getArticleListMakingTalkAPI()
-                .getArticlesByThemeId(getIntent().getIntExtra("theme_id", 0))
-                .enqueue(new Callback<Articles>() {
+                .getArticleListAPI()
+                .getJoinedArticlesByThemeId(getIntent().getIntExtra("theme_id", 0))
+                .enqueue(new Callback<ArticlesJoined>() {
                     @Override
-                    public void onResponse(@NonNull Call<Articles> call, @NonNull Response<Articles> response) {
+                    public void onResponse(@NonNull Call<ArticlesJoined> call, @NonNull Response<ArticlesJoined> response) {
                         assert response.body() != null;
-                        Article[] articles = response.body().getArticleArray();
-                        for (final Article article : articles) {
+                        ArticleJoined[] articles = response.body().getArticleArray();
+                        for (final ArticleJoined article : articles) {
                             final int articleId = article.getArticleId();
                             articleLayout = new ArticleLayout(getApplicationContext());
                             articleMainLayout.addView(articleLayout);
@@ -101,15 +97,9 @@ public class ArticleListActivity extends AppCompatActivity {
                             articleLayout.getArticleName().setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    Log.d("article", Integer.toString(articleLayout.getArticleName().getId()));
-                                    Intent intent = new Intent(getApplicationContext(), ArticleActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    intent.putExtra("article_id", articleId);
-                                    intent.putExtra("theme", getIntent().getStringExtra("theme"));
-                                    intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
-                                    startActivity(intent);
+                                    clickArticleUpdateViewsCount(article, articleId);
                                 }
                             });
-
 
                             articleLayout.getLikeView().setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -120,107 +110,133 @@ public class ArticleListActivity extends AppCompatActivity {
                                     if ((int) v.getTag() == R.drawable.ic_like) {
                                         likesCount = likedArticlesTWTag.get(likeViewId) - 1;
                                         likedArticlesTWTag.put(likeViewId, likesCount);
-                                        DBHelper.getInstance()
-                                                .getArticleListMakingTalkAPI()
-                                                .deleteRecordLikedArticle(AuthSharedPreferences.getId(getApplicationContext()), article.getArticleId())
-                                                .enqueue(new Callback<SuccessResponse>() {
-                                                    @Override
-                                                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                        SuccessResponse successResponse1 = response.body();
-                                                        assert successResponse1 != null;
-                                                        if (successResponse1.getSuccess() == 1) {
-                                                            AdditionalInfoSharedPreferences.removeArticleIdInLiked(article.getArticleId(), getApplicationContext());
-
-                                                            DBHelper.getInstance()
-                                                                    .getArticleListMakingTalkAPI()
-                                                                    .updateArticleLikesCount(article.getArticleId(), likesCount)
-                                                                    .enqueue(new Callback<SuccessResponse>() {
-                                                                        @Override
-                                                                        public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                                            SuccessResponse successResponse = response.body();
-                                                                            assert successResponse != null;
-                                                                            if (successResponse.getSuccess() == 1) {
-                                                                                ImageView likeView = (ImageView) findViewById(likeViewId);
-                                                                                likeView.setImageResource(R.drawable.ic_unlike);
-                                                                                likeView.setTag(R.drawable.ic_unlike);
-                                                                                Log.d("like", "ifWasLiked");
-                                                                                Log.d("like", Integer.toString((int) likeView.getTag()));
-                                                                                likedCountView.setText(Integer.toString(likesCount));
-                                                                            }
-                                                                        }
-
-                                                                        @Override
-                                                                        public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                                            showDialogNoNetworkConnection();
-                                                                        }
-                                                                    });
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                        showDialogNoNetworkConnection();
-                                                    }
-                                                });
-
-
+                                        unlikeDeleteRecordLikedArticle(likeViewId, likedCountView, article);
                                     } else {
 
                                         likesCount = likedArticlesTWTag.get(likeViewId) + 1;
                                         likedArticlesTWTag.put(likeViewId, likesCount);
-                                        DBHelper.getInstance()
-                                                .getArticleListMakingTalkAPI()
-                                                .createRecordLikedArticle(AuthSharedPreferences.getId(getApplicationContext()), article.getArticleId())
-                                                .enqueue(new Callback<SuccessResponse>() {
-                                                    @Override
-                                                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                        SuccessResponse successResponse1 = response.body();
-                                                        assert successResponse1 != null;
-                                                        if (successResponse1.getSuccess() == 1) {
-                                                            AdditionalInfoSharedPreferences.addArticleIdInLiked(article.getArticleId(), getApplicationContext());
-
-                                                            DBHelper.getInstance()
-                                                                    .getArticleListMakingTalkAPI()
-                                                                    .updateArticleLikesCount(article.getArticleId(), likesCount)
-                                                                    .enqueue(new Callback<SuccessResponse>() {
-                                                                        @Override
-                                                                        public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                                            SuccessResponse successResponse = response.body();
-                                                                            assert successResponse != null;
-                                                                            if (successResponse.getSuccess() == 1) {
-                                                                                ImageView likeView = (ImageView) findViewById(likeViewId);
-                                                                                likeView.setImageResource(R.drawable.ic_like);
-                                                                                likeView.setTag(R.drawable.ic_like);
-                                                                                Log.d("like", "ifWasLiked");
-                                                                                Log.d("like", Integer.toString((int) likeView.getTag()));
-                                                                                likedCountView.setText(Integer.toString(likesCount));
-                                                                            }
-                                                                        }
-
-                                                                        @Override
-                                                                        public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                                            showDialogNoNetworkConnection();
-                                                                        }
-                                                                    });
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                        showDialogNoNetworkConnection();
-                                                    }
-                                                });
-
+                                        likeCreateRecordLikedArticle(likeViewId, likedCountView, article);
                                     }
                                 }
                             });
-
-
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<Articles> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<ArticlesJoined> call, @NonNull Throwable t) {
+                        showDialogNoNetworkConnection();
+                    }
+                });
+    }
+
+    private void clickArticleUpdateViewsCount(ArticleJoined article, final int articleId) {
+        final int articleViewsFullPerc = Math.round(((float)article.getViewsFullCount() / (article.getViewsCount() + 1)) * 100);
+        DBHelper.getInstance()
+                .getArticleParamsAPI()
+                .updateArticleViewsCount(article.getArticleId(), article.getViewsCount() + 1, articleViewsFullPerc)
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        assert response.body() != null;
+                        if (response.body().getSuccess() == 1) {
+                            startNextActivity(articleId);
+                        } else {
+                            Log.d("myServerError", response.body().getMessage());
+                            showDialogNoNetworkConnection();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showDialogNoNetworkConnection();
+                    }
+                });
+    }
+
+    private void startNextActivity(int articleId) {
+        Log.d("article", Integer.toString(articleLayout.getArticleName().getId()));
+        Intent intent = new Intent(getApplicationContext(), ArticleActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("article_id", articleId);
+        intent.putExtra("theme", getIntent().getStringExtra("theme"));
+        intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
+        startActivity(intent);
+    }
+
+    private void unlikeDeleteRecordLikedArticle(final int likeViewId, final TextView likedCountView, final ArticleJoined article) {
+        DBHelper.getInstance()
+                .getArticleListAPI()
+                .deleteRecordLikedArticle(AuthSharedPreferences.getId(getApplicationContext()), article.getArticleId())
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        SuccessResponse successResponse1 = response.body();
+                        assert successResponse1 != null;
+                        if (successResponse1.getSuccess() == 1) {
+                            AdditionalInfoSharedPreferences.removeArticleIdInLiked(article.getArticleId(), getApplicationContext());
+
+                            likeUpdateLikesCount(article, likeViewId, likedCountView, R.drawable.ic_unlike);
+                        } else {
+                            Log.d("myServerError", response.body().getMessage());
+                            showDialogNoNetworkConnection();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showDialogNoNetworkConnection();
+                    }
+                });
+    }
+
+    private void likeCreateRecordLikedArticle(final int likeViewId, final TextView likedCountView, final ArticleJoined article) {
+        DBHelper.getInstance()
+                .getArticleListAPI()
+                .createRecordLikedArticle(AuthSharedPreferences.getId(getApplicationContext()), article.getArticleId())
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        SuccessResponse successResponse1 = response.body();
+                        assert successResponse1 != null;
+                        if (successResponse1.getSuccess() == 1) {
+                            AdditionalInfoSharedPreferences.addArticleIdInLiked(article.getArticleId(), getApplicationContext());
+                            likeUpdateLikesCount(article, likeViewId, likedCountView, R.drawable.ic_like);
+                        } else {
+                            Log.d("myServerError", response.body().getMessage());
+                            showDialogNoNetworkConnection();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showDialogNoNetworkConnection();
+                    }
+                });
+    }
+
+    private void likeUpdateLikesCount(ArticleJoined article, final int likeViewId, final TextView likedCountView, final int p) {
+        DBHelper.getInstance()
+                .getArticleParamsAPI()
+                .updateArticleLikesCount(article.getArticleId(), likesCount)
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        SuccessResponse successResponse = response.body();
+                        assert successResponse != null;
+                        if (successResponse.getSuccess() == 1) {
+                            ImageView likeView = (ImageView) findViewById(likeViewId);
+                            likeView.setImageResource(p);
+                            likeView.setTag(p);
+                            Log.d("like", "ifWasLiked");
+                            Log.d("like", Integer.toString((int) likeView.getTag()));
+                            likedCountView.setText(Integer.toString(likesCount));
+                        } else {
+                            Log.d("myServerError", response.body().getMessage());
+                            showDialogNoNetworkConnection();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
                         showDialogNoNetworkConnection();
                     }
                 });

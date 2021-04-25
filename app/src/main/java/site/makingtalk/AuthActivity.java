@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -27,11 +26,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
-import site.makingtalk.requests.User;
-import site.makingtalk.requests.UserAdditionalInfo;
-import site.makingtalk.requests.UserLikedArticle;
-import site.makingtalk.requests.UserLikedArticles;
-import site.makingtalk.requests.UserPrivacy;
+import site.makingtalk.requests.entities.User;
+import site.makingtalk.requests.entities.UserAdditionalInfo;
+import site.makingtalk.requests.entities.UserLikedArticle;
+import site.makingtalk.requests.entities.UserLikedArticles;
+import site.makingtalk.requests.entities.UserPrivacy;
 import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.MD5;
@@ -125,7 +124,7 @@ public class AuthActivity extends AppCompatActivity {
                     Log.d("http connection", "2");
                     try {
                         DBHelper.getInstance()
-                                .getUserMainInfoMakingTalkAPI()
+                                .getUserMainInfoAPI()
                                 .getUserByEmail(loginET.getText().toString())
                                 .enqueue(new Callback<User>() {
                                     @Override
@@ -145,7 +144,7 @@ public class AuthActivity extends AppCompatActivity {
                     }
                 } else {
                     DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
+                            .getUserMainInfoAPI()
                             .getUserByLogin(loginET.getText().toString())
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -176,7 +175,7 @@ public class AuthActivity extends AppCompatActivity {
 
                 if (Pattern.matches("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$", loginText)) {
                     DBHelper.getInstance()
-                            .getUserMainInfoMakingTalkAPI()
+                            .getUserMainInfoAPI()
                             .getUserByEmail(loginText)
                             .enqueue(new Callback<User>() {
                                 @Override
@@ -213,7 +212,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private void savePreferencies() {
         DBHelper.getInstance()
-                .getUserMainInfoMakingTalkAPI()
+                .getUserMainInfoAPI()
                 .getUserByLogin(loginET.getText().toString())
                 .enqueue(new Callback<User>() {
                     @Override
@@ -239,7 +238,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private void saveUserAdditionalInfo(final User user) {
         DBHelper.getInstance()
-                .getUserAddInfoMakingTalkAPI()
+                .getUserAddInfoAPI()
                 .getUserAddInfoById(user.getUserId())
                 .enqueue(new Callback<UserAdditionalInfo>() {
                     @Override
@@ -252,7 +251,7 @@ public class AuthActivity extends AppCompatActivity {
                                     userAdditionalInfo.getUserDescription(),
                                     getApplicationContext());
                             DBHelper.getInstance()
-                                    .getArticleListMakingTalkAPI()
+                                    .getArticleListAPI()
                                     .getUserLikedArticlesByUserId(user.getUserId())
                                     .enqueue(new Callback<UserLikedArticles>() {
                                         @Override
@@ -286,7 +285,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private void savePrivacyPreferences(User user) {
         DBHelper.getInstance()
-                .getUserPrivacyMakingTalkAPI()
+                .getUserPrivacyAPI()
                 .getPrivacyById(user.getUserId())
                 .enqueue(new Callback<UserPrivacy>() {
                     @Override
