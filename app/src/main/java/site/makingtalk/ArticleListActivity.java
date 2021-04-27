@@ -34,15 +34,13 @@ import site.makingtalk.secondary.AuthSharedPreferences;
 
 public class ArticleListActivity extends AppCompatActivity {
 
-    private LinearLayout articleListMainLayout;
     private LinearLayout articleMainLayout;
-    private ImageView returnToMain;
-    private TextView themeName;
-    private ArticleParams[] articlesParams;
+    private final ArrayList<ArticleJoined> viewedArticlesList = new ArrayList<>();
     private int likesCount;
-    private HashMap<Integer, Integer> likedArticlesTWTag = new HashMap<>();
+    private int rang = 0;
+    private HashMap<Integer, Integer> rangMap = new HashMap<>();
+    private final HashMap<Integer, Integer> likedArticlesTWTag = new HashMap<>();
     private ArticleLayout articleLayout;
-    private boolean isLike = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +48,7 @@ public class ArticleListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_article_list);
         set_fullscreen();
-        returnToMain = findViewById(R.id.IV_return_to_article_list);
+        ImageView returnToMain = findViewById(R.id.IV_return_to_article_list);
         returnToMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,7 +56,7 @@ public class ArticleListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        themeName = findViewById(R.id.TV_article_list_theme_name);
+        TextView themeName = findViewById(R.id.TV_article_list_theme_name);
         themeName.setText(getIntent().getStringExtra("theme"));
 
         if (!NetworkManager.isNetworkAvailable(getApplicationContext()))
@@ -81,44 +79,19 @@ public class ArticleListActivity extends AppCompatActivity {
                         assert response.body() != null;
                         ArticleJoined[] articles = response.body().getArticleArray();
                         for (final ArticleJoined article : articles) {
-                            final int articleId = article.getArticleId();
-                            articleLayout = new ArticleLayout(getApplicationContext());
-                            articleMainLayout.addView(articleLayout);
-                            articleLayout.getArticleName().setText(article.getArticleTitle());
-                            articleLayout.getLikeCountView().setText(Integer.toString(article.getLikesCount()));
-                            likedArticlesTWTag.put(articleLayout.getLikeView().getId(), article.getLikesCount());
-                            ArrayList<Integer> likedArticlesId = AdditionalInfoSharedPreferences.getLikedArticlesIds(getApplicationContext());
-                            if (likedArticlesId != null) {
-                                if (likedArticlesId.contains(article.getArticleId())) {
-                                    articleLayout.getLikeView().setImageResource(R.drawable.ic_like);
-                                    findViewById(articleLayout.getLikeView().getId()).setTag(R.drawable.ic_like);
+                            ArrayList<Integer> viewedArticlesIds = AdditionalInfoSharedPreferences.getViewedArticlesIds(getApplicationContext());
+                            if (viewedArticlesIds != null) {
+                                if (viewedArticlesIds.contains(article.getArticleId())) {
+                                    viewedArticlesList.add(article);
+                                } else {
+                                    setArticleSettings(article);
                                 }
+                            } else {
+                                setArticleSettings(article);
                             }
-                            articleLayout.getArticleName().setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    clickArticleUpdateViewsCount(article, articleId);
-                                }
-                            });
-
-                            articleLayout.getLikeView().setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    final int likeViewId = v.getId();
-                                    final TextView likedCountView = articleMainLayout.findViewWithTag(likeViewId);
-
-                                    if ((int) v.getTag() == R.drawable.ic_like) {
-                                        likesCount = likedArticlesTWTag.get(likeViewId) - 1;
-                                        likedArticlesTWTag.put(likeViewId, likesCount);
-                                        unlikeDeleteRecordLikedArticle(likeViewId, likedCountView, article);
-                                    } else {
-
-                                        likesCount = likedArticlesTWTag.get(likeViewId) + 1;
-                                        likedArticlesTWTag.put(likeViewId, likesCount);
-                                        likeCreateRecordLikedArticle(likeViewId, likedCountView, article);
-                                    }
-                                }
-                            });
+                        }
+                        for (ArticleJoined articleJoined : viewedArticlesList) {
+                            setViewedArticleSettings(articleJoined);
                         }
                     }
 
@@ -127,6 +100,100 @@ public class ArticleListActivity extends AppCompatActivity {
                         showDialogNoNetworkConnection();
                     }
                 });
+    }
+
+    private void setArticleSettings(final ArticleJoined article) {
+        final int articleId = article.getArticleId();
+        articleLayout = new ArticleLayout(getApplicationContext());
+        rang++;
+        rangMap.put(article.getArticleId(), rang);
+        articleMainLayout.addView(articleLayout);
+        articleLayout.getArticleName().setText(article.getArticleTitle());
+        articleLayout.getLikeCountView().setText(Integer.toString(article.getLikesCount()));
+        articleLayout.getViewsCountView().setText(Integer.toString(article.getViewsCount()));
+        likedArticlesTWTag.put(articleLayout.getLikeView().getId(), article.getLikesCount());
+        ArrayList<Integer> likedArticlesId = AdditionalInfoSharedPreferences.getLikedArticlesIds(getApplicationContext());
+
+        if (likedArticlesId != null) {
+            if (likedArticlesId.contains(article.getArticleId())) {
+                articleLayout.getLikeView().setImageResource(R.drawable.ic_like);
+                findViewById(articleLayout.getLikeView().getId()).setTag(R.drawable.ic_like);
+            }
+        }
+
+        articleLayout.getArticleName().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickArticleUpdateViewsCount(article, articleId);
+            }
+        });
+
+        articleLayout.getLikeView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int likeViewId = v.getId();
+                final TextView likedCountView = articleMainLayout.findViewWithTag(likeViewId);
+
+                if ((int) v.getTag() == R.drawable.ic_like) {
+                    likesCount = likedArticlesTWTag.get(likeViewId) - 1;
+                    likedArticlesTWTag.put(likeViewId, likesCount);
+                    unlikeDeleteRecordLikedArticle(likeViewId, likedCountView, article);
+                } else {
+
+                    likesCount = likedArticlesTWTag.get(likeViewId) + 1;
+                    likedArticlesTWTag.put(likeViewId, likesCount);
+                    likeCreateRecordLikedArticle(likeViewId, likedCountView, article);
+                }
+            }
+        });
+    }
+
+    private void setViewedArticleSettings(final ArticleJoined article) {
+        final int articleId = article.getArticleId();
+        articleLayout = new ArticleLayout(getApplicationContext());
+        rang++;
+        rangMap.put(article.getArticleId(), rang);
+        articleMainLayout.addView(articleLayout);
+        articleLayout.getArticleName().setText(article.getArticleTitle());
+        articleLayout.getLikeCountView().setText(Integer.toString(article.getLikesCount()));
+        articleLayout.getViewsCountView().setText(Integer.toString(article.getViewsCount()));
+        likedArticlesTWTag.put(articleLayout.getLikeView().getId(), article.getLikesCount());
+        ArrayList<Integer> likedArticlesId = AdditionalInfoSharedPreferences.getLikedArticlesIds(getApplicationContext());
+
+        if (likedArticlesId != null) {
+            if (likedArticlesId.contains(article.getArticleId())) {
+                articleLayout.getLikeView().setImageResource(R.drawable.ic_like);
+                findViewById(articleLayout.getLikeView().getId()).setTag(R.drawable.ic_like);
+            }
+        }
+
+        articleLayout.getSuccessView().setVisibility(View.VISIBLE);
+
+        articleLayout.getArticleName().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickArticleUpdateViewsCount(article, articleId);
+            }
+        });
+
+        articleLayout.getLikeView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int likeViewId = v.getId();
+                final TextView likedCountView = articleMainLayout.findViewWithTag(likeViewId);
+
+                if ((int) v.getTag() == R.drawable.ic_like) {
+                    likesCount = likedArticlesTWTag.get(likeViewId) - 1;
+                    likedArticlesTWTag.put(likeViewId, likesCount);
+                    unlikeDeleteRecordLikedArticle(likeViewId, likedCountView, article);
+                } else {
+
+                    likesCount = likedArticlesTWTag.get(likeViewId) + 1;
+                    likedArticlesTWTag.put(likeViewId, likesCount);
+                    likeCreateRecordLikedArticle(likeViewId, likedCountView, article);
+                }
+            }
+        });
     }
 
     private void clickArticleUpdateViewsCount(ArticleJoined article, final int articleId) {
@@ -139,10 +206,27 @@ public class ArticleListActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
                         assert response.body() != null;
                         if (response.body().getSuccess() == 1) {
-                            startNextActivity(articleId);
+                            DBHelper.getInstance()
+                                    .getArticleListAPI()
+                                    .addClickedRang(rangMap.get(articleId))
+                                    .enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                            assert response.body() != null;
+                                            if (response.body().getSuccess() == 1) {
+                                                startNextActivity(articleId);
+                                            } else {
+                                                showMyServerError(response);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                            showDialogNoNetworkConnection();
+                                        }
+                                    });
                         } else {
-                            Log.d("myServerError", response.body().getMessage());
-                            showDialogNoNetworkConnection();
+                            showMyServerError(response);
                         }
                     }
 
@@ -151,6 +235,11 @@ public class ArticleListActivity extends AppCompatActivity {
                         showDialogNoNetworkConnection();
                     }
                 });
+    }
+
+    private void showMyServerError(@NonNull Response<SuccessResponse> response) {
+        Log.d("myServerError", response.body().getMessage());
+        showDialogNoNetworkConnection();
     }
 
     private void startNextActivity(int articleId) {
@@ -172,12 +261,11 @@ public class ArticleListActivity extends AppCompatActivity {
                         SuccessResponse successResponse1 = response.body();
                         assert successResponse1 != null;
                         if (successResponse1.getSuccess() == 1) {
-                            AdditionalInfoSharedPreferences.removeArticleIdInLiked(article.getArticleId(), getApplicationContext());
+                            AdditionalInfoSharedPreferences.removeLikedArticleIdInLiked(article.getArticleId(), getApplicationContext());
 
                             likeUpdateLikesCount(article, likeViewId, likedCountView, R.drawable.ic_unlike);
                         } else {
-                            Log.d("myServerError", response.body().getMessage());
-                            showDialogNoNetworkConnection();
+                            showMyServerError(response);
                         }
                     }
 
@@ -198,11 +286,10 @@ public class ArticleListActivity extends AppCompatActivity {
                         SuccessResponse successResponse1 = response.body();
                         assert successResponse1 != null;
                         if (successResponse1.getSuccess() == 1) {
-                            AdditionalInfoSharedPreferences.addArticleIdInLiked(article.getArticleId(), getApplicationContext());
+                            AdditionalInfoSharedPreferences.addLikedArticleIdInLiked(article.getArticleId(), getApplicationContext());
                             likeUpdateLikesCount(article, likeViewId, likedCountView, R.drawable.ic_like);
                         } else {
-                            Log.d("myServerError", response.body().getMessage());
-                            showDialogNoNetworkConnection();
+                            showMyServerError(response);
                         }
                     }
 
@@ -230,8 +317,7 @@ public class ArticleListActivity extends AppCompatActivity {
                             Log.d("like", Integer.toString((int) likeView.getTag()));
                             likedCountView.setText(Integer.toString(likesCount));
                         } else {
-                            Log.d("myServerError", response.body().getMessage());
-                            showDialogNoNetworkConnection();
+                            showMyServerError(response);
                         }
                     }
 

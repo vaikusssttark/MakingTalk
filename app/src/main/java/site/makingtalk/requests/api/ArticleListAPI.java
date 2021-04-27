@@ -13,6 +13,7 @@ import site.makingtalk.requests.entities.ArticlesJoined;
 import site.makingtalk.requests.entities.LikedArticles;
 import site.makingtalk.requests.entities.SuccessResponse;
 import site.makingtalk.requests.entities.UserLikedArticles;
+import site.makingtalk.requests.entities.ViewedArticles;
 
 public interface ArticleListAPI {
     @GET("articles/get_articles_by_theme_id.php")
@@ -31,6 +32,9 @@ public interface ArticleListAPI {
     @GET("articles/get_user_liked_articles_by_user_id.php")
     Call<UserLikedArticles> getUserLikedArticlesByUserId(@Query("user_id") int userId);
 
+    @GET("articles/get_user_viewed_articles_by_user_id.php")
+    Call<ViewedArticles> getUserViewedArticlesByUserId(@Query("user_id") int userId);
+
     @GET("articles/get_liked_articles.php")
     Call<LikedArticles> getLikedArticles();
 
@@ -41,4 +45,12 @@ public interface ArticleListAPI {
     @FormUrlEncoded
     @POST("articles/create_record_liked_article.php")
     Call<SuccessResponse> createRecordLikedArticle(@Field("user_id") int userId, @Field("article_id") int articleId);
+
+    @FormUrlEncoded
+    @POST("articles/create_record_viewed_article.php")
+    Call<SuccessResponse> createRecordViewedArticle(@Field("user_id") int userId, @Field("article_id") int articleId);
+
+    @FormUrlEncoded
+    @POST("articles/add_clicked_rang.php")
+    Call<SuccessResponse> addClickedRang(@Field("rang") int rang);
 }

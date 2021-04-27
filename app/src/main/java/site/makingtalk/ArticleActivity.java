@@ -27,6 +27,8 @@ import site.makingtalk.requests.entities.ArticleParams;
 import site.makingtalk.requests.entities.ArticlesJoined;
 import site.makingtalk.requests.entities.ArticlesParams;
 import site.makingtalk.requests.entities.SuccessResponse;
+import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
+import site.makingtalk.secondary.AuthSharedPreferences;
 
 public class ArticleActivity extends AppCompatActivity {
 
@@ -76,7 +78,7 @@ public class ArticleActivity extends AppCompatActivity {
                             title.setText(article.getArticleTitle());
                             text.setText(article.getArticleText());
                         } else {
-                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                            showMyServerError(response.body().getMessage());
                         }
                     }
 
@@ -99,7 +101,7 @@ public class ArticleActivity extends AppCompatActivity {
                                 if (response.body().getSuccess() == 1) {
                                     article = response.body();
                                     int article_id = getIntent().getIntExtra("article_id", 0);
-                                    float i = (((float)article.getViewsFullCount() + 1) / article.getViewsCount()) * 100;
+                                    float i = (((float) article.getViewsFullCount() + 1) / article.getViewsCount()) * 100;
                                     int articleViewsFullPerc = Math.round(i);
                                     Log.d("myLog", "artId = " + article_id + ", viewsFullCount = " + article.getViewsFullCount() + ", perc = " + ((article.getViewsFullCount() + 1) / article.getViewsCount()) * 100 + " " + (article.getViewsFullCount() + 1) + " " + article.getViewsCount() + " " + i);
                                     DBHelper.getInstance()
@@ -107,16 +109,34 @@ public class ArticleActivity extends AppCompatActivity {
                                             .updateArticleViewsFullCount(article_id, article.getViewsFullCount() + 1, articleViewsFullPerc)
                                             .enqueue(new Callback<SuccessResponse>() {
                                                 @Override
-                                                public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull final Response<SuccessResponse> response) {
                                                     assert response.body() != null;
                                                     if (response.body().getSuccess() == 1) {
-                                                        Intent intent = new Intent(ArticleActivity.this, ArticleListActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                        intent.putExtra("theme", getIntent().getStringExtra("theme"));
-                                                        intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
-                                                        startActivity(intent);
+                                                        DBHelper.getInstance()
+                                                                .getArticleListAPI()
+                                                                .createRecordViewedArticle(AuthSharedPreferences.getId(getApplicationContext()), getIntent().getIntExtra("article_id", 0))
+                                                                .enqueue(new Callback<SuccessResponse>() {
+                                                                    @Override
+                                                                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                                        assert response.body() != null;
+                                                                        if (response.body().getSuccess() == 1) {
+                                                                            AdditionalInfoSharedPreferences.addViewedIdInLiked(getIntent().getIntExtra("article_id", 0), getApplicationContext());
+                                                                            Intent intent = new Intent(ArticleActivity.this, ArticleListActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                            intent.putExtra("theme", getIntent().getStringExtra("theme"));
+                                                                            intent.putExtra("theme_id", getIntent().getIntExtra("theme_id", 0));
+                                                                            startActivity(intent);
+                                                                        } else {
+                                                                            showMyServerError(response.body().getMessage());
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                                                        showDialogNoNetworkConnection();
+                                                                    }
+                                                                });
                                                     } else {
-                                                        Log.d("myServerError", response.body().getMessage());
-                                                        showDialogNoNetworkConnection();
+                                                        showMyServerError(response.body().getMessage());
                                                     }
                                                 }
 
@@ -126,8 +146,7 @@ public class ArticleActivity extends AppCompatActivity {
                                                 }
                                             });
                                 } else {
-                                    Log.d("myServerError", response.body().getMessage());
-                                    showDialogNoNetworkConnection();
+                                    showMyServerError(response.body().getMessage());
                                 }
                             }
 
@@ -139,6 +158,11 @@ public class ArticleActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showMyServerError(String message) {
+        Log.d("myServerError", message);
+        showDialogNoNetworkConnection();
     }
 
     private void set_fullscreen() {

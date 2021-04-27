@@ -15,6 +15,8 @@
     <dimen name="dim5dp">5dp</dimen>
     <dimen name="dim15dp">15dp</dimen>
     <dimen name="dim30dp">28dp</dimen>
+    <dimen name="dim60dp">70dp</dimen>
+    <dimen name="dim70dp">100dp</dimen>
     <dimen name="dim270dp">270dp</dimen>
     <dimen name="dim20dp">20dp</dimen>
 

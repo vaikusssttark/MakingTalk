@@ -82,6 +82,7 @@
     <string name="ET_dialog_profile_pwd2_hint">Введите новый пароль</string>
     <string name="ET_dialog_profile_pwd3_hint">Повторите новый пароль</string>
     <string name="TV_dialog_profile_pwd_text">Измените пароль</string>
+    <string name="iv_return_to_article_list">IV_return_to_article_list</string>
 
 
 </resources>

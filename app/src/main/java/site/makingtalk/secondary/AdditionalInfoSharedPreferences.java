@@ -13,6 +13,7 @@ public class AdditionalInfoSharedPreferences {
     private static final String ADDITIONAL_INFO_PREFERENCES_NAME = "AdditionalInfoPreferencesName";
     private static final String ADDITIONAL_INFO_PREFERENCES_DESCRIPTION = "AdditionalInfoPreferencesDescription";
     private static final String ADDITIONAL_INFO_PREFERENCES_LIKED_ARTICLES_IDS = "AdditionalInfoPreferencesLikedArticlesId";
+    private static final String ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS = "AdditionalInfoPreferencesViewedArticlesId";
 
     public static void savePrefs(String name, String description, Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
@@ -20,6 +21,7 @@ public class AdditionalInfoSharedPreferences {
         editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_NAME, name);
         editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_DESCRIPTION, description);
         editor.putStringSet(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_LIKED_ARTICLES_IDS, new HashSet<String>());
+        editor.putStringSet(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS, new HashSet<String>());
         editor.apply();
     }
 
@@ -67,7 +69,7 @@ public class AdditionalInfoSharedPreferences {
 
     }
 
-    public static void addArticleIdInLiked(int articleId, Context context) {
+    public static void addLikedArticleIdInLiked(int articleId, Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         ArrayList<Integer> oldSet = AdditionalInfoSharedPreferences.getLikedArticlesIds(context);
@@ -85,7 +87,39 @@ public class AdditionalInfoSharedPreferences {
         editor.apply();
     }
 
-    public static void removeArticleIdInLiked(int articleId, Context context) {
+    public static ArrayList<Integer> getViewedArticlesIds(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        Set<String> viewedArticlesString = sharedPreferences.getStringSet(ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS, null);
+        ArrayList<Integer> viewedArticlesInt = new ArrayList<>();
+
+        if (viewedArticlesString != null) {
+            for (String s : viewedArticlesString) {
+                viewedArticlesInt.add(Integer.parseInt(s));
+            }
+            return viewedArticlesInt;
+        } else
+            return null;
+    }
+
+    public static void addViewedIdInLiked(int articleId, Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        ArrayList<Integer> oldSet = AdditionalInfoSharedPreferences.getViewedArticlesIds(context);
+        if (oldSet != null) {
+            oldSet.add(articleId);
+        } else {
+            oldSet = new ArrayList<>();
+            oldSet.add(articleId);
+        }
+        Set<String> newSet = new HashSet<>();
+        for (Integer integer : oldSet) {
+            newSet.add(integer.toString());
+        }
+        editor.putStringSet(ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS, newSet);
+        editor.apply();
+    }
+
+    public static void removeLikedArticleIdInLiked(int articleId, Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         ArrayList<Integer> oldSet = AdditionalInfoSharedPreferences.getLikedArticlesIds(context);
@@ -96,6 +130,20 @@ public class AdditionalInfoSharedPreferences {
             newSet.add(integer.toString());
         }
         editor.putStringSet(ADDITIONAL_INFO_PREFERENCES_LIKED_ARTICLES_IDS, newSet);
+        editor.apply();
+    }
+
+    public static void removeViewedArticleIdInLiked(int articleId, Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        ArrayList<Integer> oldSet = AdditionalInfoSharedPreferences.getLikedArticlesIds(context);
+        oldSet.remove((Integer) articleId);
+
+        Set<String> newSet = new HashSet<>();
+        for (Integer integer : oldSet) {
+            newSet.add(integer.toString());
+        }
+        editor.putStringSet(ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS, newSet);
         editor.apply();
     }
 

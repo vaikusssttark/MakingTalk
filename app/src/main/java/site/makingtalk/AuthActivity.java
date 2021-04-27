@@ -31,6 +31,8 @@ import site.makingtalk.requests.entities.UserAdditionalInfo;
 import site.makingtalk.requests.entities.UserLikedArticle;
 import site.makingtalk.requests.entities.UserLikedArticles;
 import site.makingtalk.requests.entities.UserPrivacy;
+import site.makingtalk.requests.entities.ViewedArticle;
+import site.makingtalk.requests.entities.ViewedArticles;
 import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.MD5;
@@ -226,7 +228,7 @@ public class AuthActivity extends AppCompatActivity {
                             saveUserAdditionalInfo(user);
                             savePrivacyPreferences(user);
                         } else
-                            Toast.makeText(getApplicationContext(), "Ошибка при обращении к БД", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -259,10 +261,35 @@ public class AuthActivity extends AppCompatActivity {
                                             UserLikedArticles userLikedArticles = response.body();
                                             assert userLikedArticles != null;
                                             if (userLikedArticles.getSuccess() == 1) {
-                                                System.out.println(userLikedArticles.toString());
                                                 for (UserLikedArticle articleId : userLikedArticles.getArticleIds()) {
-                                                    AdditionalInfoSharedPreferences.addArticleIdInLiked(articleId.getArticleId(), getApplicationContext());
+                                                    AdditionalInfoSharedPreferences.addLikedArticleIdInLiked(articleId.getArticleId(), getApplicationContext());
                                                 }
+
+                                                DBHelper.getInstance()
+                                                        .getArticleListAPI()
+                                                        .getUserViewedArticlesByUserId(user.getUserId())
+                                                        .enqueue(new Callback<ViewedArticles>() {
+                                                            @Override
+                                                            public void onResponse(@NonNull Call<ViewedArticles> call, @NonNull Response<ViewedArticles> response) {
+                                                                assert response.body() != null;
+                                                                ViewedArticle[] userViewedArticles = response.body().getArticleIds();
+                                                                if (response.body().getSuccess() == 1) {
+                                                                    for (ViewedArticle viewedArticle : userViewedArticles) {
+                                                                        AdditionalInfoSharedPreferences.addViewedIdInLiked(viewedArticle.getArticleId(), getApplicationContext());
+                                                                    }
+                                                                } else {
+                                                                    Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(@NonNull Call<ViewedArticles> call, @NonNull Throwable t) {
+                                                                showNoNetworkConnectionDialog();
+                                                            }
+                                                        });
+
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
                                             }
                                         }
 
@@ -272,8 +299,9 @@ public class AuthActivity extends AppCompatActivity {
                                             showNoNetworkConnectionDialog();
                                         }
                                     });
-                        } else
-                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override
@@ -300,7 +328,7 @@ public class AuthActivity extends AppCompatActivity {
                                     userPrivacy.getProgressVisibility(),
                                     getApplicationContext());
                         } else
-                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
