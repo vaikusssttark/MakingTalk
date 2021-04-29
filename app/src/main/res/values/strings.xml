@@ -1,6 +1,6 @@
 <resources>
     //general
-    <string name="app_name">Making Talk</string>
+    <string name="app_name">YourBase</string>
     <string name="backgound1_desc">Фон 1</string>
     <string name="backgound2_desc">Фон 2</string>
     <string name="main_icon_desc">Главная иконка</string>

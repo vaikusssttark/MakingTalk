@@ -22,7 +22,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_profile"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
