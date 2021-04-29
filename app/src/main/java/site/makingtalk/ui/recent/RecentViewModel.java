@@ -10,7 +10,7 @@ public class RecentViewModel extends ViewModel {
 
     public RecentViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is slideshow fragment");
+
     }
 
     public LiveData<String> getText() {

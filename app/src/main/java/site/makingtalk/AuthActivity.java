@@ -251,6 +251,8 @@ public class AuthActivity extends AppCompatActivity {
                             AdditionalInfoSharedPreferences.savePrefs(
                                     userAdditionalInfo.getUserName(),
                                     userAdditionalInfo.getUserDescription(),
+                                    userAdditionalInfo.getChannelId(),
+                                    userAdditionalInfo.getDisplayedChannelId(),
                                     getApplicationContext());
                             DBHelper.getInstance()
                                     .getArticleListAPI()

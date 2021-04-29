@@ -56,8 +56,10 @@
     <string name="cinema">Кино</string>
 
     //profile_fragment
+    <string name="TV_add_info_displayed_channel_id">ID текущего канала:</string>
     <string name="TV_add_info_head_login">Логин:</string>
     <string name="TV_add_info_head_email">E-mail:</string>
+    <string name="TV_add_info_channel_id">ID моего канала:</string>
     <string name="add_info_change">Изменить</string>
     <string name="TV_add_info_head_name">Имя:</string>
     <string name="TV_add_info_head_description">О себе:</string>
@@ -76,6 +78,8 @@
     <string name="TV_dialog_profile_email_text">Введите новый E-mail</string>
     <string name="TV_dialog_profile_login_text">Введите новый логин</string>
     <string name="ET_dialog_profile_login_hint">Новый логин</string>
+    <string name="TV_dialog_profile_displayed_channel_id_text">Введите ID канала</string>
+    <string name="ET_dialog_profile_displayed_channel_id_hint">ID канала</string>
     <string name="TV_dialog_profile_name_text">Введите новое имя</string>
     <string name="ET_dialog_profile_name_hint">Новое имя</string>
     <string name="ET_dialog_profile_pwd1_hint">Введите старый пароль</string>
@@ -83,6 +87,10 @@
     <string name="ET_dialog_profile_pwd3_hint">Повторите новый пароль</string>
     <string name="TV_dialog_profile_pwd_text">Измените пароль</string>
     <string name="iv_return_to_article_list">IV_return_to_article_list</string>
+    <string name="TW_recent_note">Скоро тут появятся недавно просмотренные статьи</string>
+    <string name="TW_share_note">Скоро тут появятся понравившиеся статьи</string>
+    <string name="TW_send_note">Вы можете задать свой вопрос на email: vaikusssttark@gmail.com</string>
+    <string name="TW_tool_note">Скоро мы сможем расширить Ваш функционал</string>
 
 
 </resources>

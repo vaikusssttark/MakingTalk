@@ -32,12 +32,18 @@ import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.entities.SuccessResponse;
 import site.makingtalk.requests.entities.User;
+import site.makingtalk.requests.entities.UserAdditionalInfo;
+import site.makingtalk.requests.entities.UsersAdditionalInfo;
 import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.MD5;
 import site.makingtalk.secondary.PrivacySharedPreferences;
 
 public class ProfileFragment extends Fragment {
+
+    private CheckedTextView tv_displayed_channel_id;
+    private TextView tv_update_displayed_channel_id;
+    private TextView tv_error_displayed_channel_id;
 
     private CheckedTextView tv_login;
     private TextView tv_update_login;
@@ -46,6 +52,8 @@ public class ProfileFragment extends Fragment {
     private CheckedTextView tv_email;
     private TextView tv_update_email;
     private TextView tv_error_email;
+
+    private CheckedTextView tv_channel_id;
 
     private CheckedTextView tv_name;
     private TextView tv_update_name;
@@ -67,6 +75,7 @@ public class ProfileFragment extends Fragment {
     private EditText et_email;
     private EditText et_name;
     private EditText et_description;
+    private EditText et_displayed_channel_id;
 
     private EditText et_pwd1;
     private TextView tv_error_pwd1;
@@ -100,6 +109,17 @@ public class ProfileFragment extends Fragment {
         setCBDescriptionListener();
         setCBProgressListener();
 
+        tv_displayed_channel_id = root.findViewById(R.id.TV_add_info_displayed_channel_id);
+        tv_displayed_channel_id.setText(AdditionalInfoSharedPreferences.getDisplayedChannelId(applicationContext));
+        tv_update_displayed_channel_id = root.findViewById(R.id.TV_add_info_change_displayed_channel_id);
+        tv_update_displayed_channel_id.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDisplayedChannelIdDialog(root);
+            }
+        });
+
+
         tv_update_login = root.findViewById(R.id.TV_add_info_change_login);
         tv_update_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,6 +135,9 @@ public class ProfileFragment extends Fragment {
                 showEmailDialog(root);
             }
         });
+
+        tv_channel_id = root.findViewById(R.id.TV_add_info_channel_id);
+        tv_channel_id.setText(AdditionalInfoSharedPreferences.getChannelId(applicationContext));
 
         tv_update_name = root.findViewById(R.id.TV_add_info_change_name);
         tv_update_name.setOnClickListener(new View.OnClickListener() {
@@ -693,6 +716,114 @@ public class ProfileFragment extends Fragment {
 
 
     /**
+     * Обработка изменения текущего channel ID
+     */
+
+    private void showDisplayedChannelIdDialog(final View root) {
+        final Dialog dialog = new Dialog(root.getContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_profile_update_displayed_channel_id);
+        positiveBtn = dialog.findViewById(R.id.BTN_dialog_profile_positive);
+        negativeBtn = dialog.findViewById(R.id.BTN_dialog_profile_negative);
+        et_displayed_channel_id = dialog.findViewById(R.id.ET_dialog_profile_displayed_channel_id);
+        et_displayed_channel_id.setText(tv_displayed_channel_id.getText().toString());
+        tv_error_displayed_channel_id = dialog.findViewById(R.id.TV_dialog_profile_error_displayed_channel_id);
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String displayed_channel_id = et_displayed_channel_id.getText().toString();
+                final Context context = requireActivity().getApplicationContext();
+                et_displayed_channel_id.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        setDefaultStyleDisplayedChannelId();
+                    }
+                });
+                if (!NetworkManager.isNetworkAvailable(context)) {
+                    setErrorStyleDisplayedChannelId("Нет подключения к интернету");
+                } else if (displayed_channel_id.length() > 10) {
+                    setErrorStyleDisplayedChannelId("ID состоит из 10 символов");
+                } else if (!Pattern.matches(regularLogin, displayed_channel_id)) {
+                    setErrorStyleDisplayedChannelId("Только латиница и цифры");
+                } else {
+                    DBHelper.getInstance()
+                            .getUserAddInfoAPI()
+                            .getUsersAddInfo()
+                            .enqueue(new Callback<UsersAdditionalInfo>() {
+                                @Override
+                                public void onResponse(@NonNull Call<UsersAdditionalInfo> call, @NonNull Response<UsersAdditionalInfo> response) {
+                                    UsersAdditionalInfo usersAdditionalInfo = response.body();
+                                    assert usersAdditionalInfo != null;
+                                    if (usersAdditionalInfo.getSuccess() == 1) {
+                                        boolean flag = false;
+                                        if (displayed_channel_id.length() < 10) {
+                                            setErrorStyleDisplayedChannelId("ID состоит из 10 символов");
+                                        } else {
+                                            for (UserAdditionalInfo userAdditionalInfo : usersAdditionalInfo.getUserAdditionalInfos()) {
+                                                if (userAdditionalInfo.getChannelId().equals(displayed_channel_id)) {
+                                                    flag = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (flag) {
+                                                DBHelper.getInstance()
+                                                        .getUserAddInfoAPI()
+                                                        .updateUserAddInfoDisplayChannelId(AuthSharedPreferences.getId(context), displayed_channel_id)
+                                                        .enqueue(new Callback<SuccessResponse>() {
+                                                            @Override
+                                                            public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                                                                assert response.body() != null;
+                                                                if (response.body().getSuccess() == 1) {
+                                                                    AdditionalInfoSharedPreferences.updateDisplayedChannelId(displayed_channel_id, context);
+                                                                    tv_displayed_channel_id.setText(displayed_channel_id);
+                                                                    dialog.cancel();
+                                                                } else {
+                                                                    Toast.makeText(context, "Ошибка при обращении к БД:" + response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                                                                showDialogNoNetworkConnection();
+                                                            }
+                                                        });
+                                            } else {
+                                                setErrorStyleDisplayedChannelId("Такого канала нет");
+                                            }
+                                        }
+
+                                    } else {
+                                        setErrorStyleLogin("Ошибка при запросе к БД:" + response.body().getMessage());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<UsersAdditionalInfo> call, @NonNull Throwable t) {
+                                    setErrorStyleLogin("Нет подключения к интернету");
+                                }
+                            });
+                }
+//
+            }
+        });
+        negativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+        dialog.show();
+    }
+
+    /**
      * Обработка изменения логина
      */
 
@@ -759,7 +890,7 @@ public class ProfileFragment extends Fragment {
                                                             tv_login.setText(login);
                                                             dialog.cancel();
                                                         } else
-                                                            Toast.makeText(context, "Ошибка при обращении к БД", Toast.LENGTH_SHORT).show();
+                                                            Toast.makeText(context, "Ошибка при обращении к БД:" + response.body().getMessage(), Toast.LENGTH_SHORT).show();
                                                     }
 
                                                     @Override
@@ -786,6 +917,22 @@ public class ProfileFragment extends Fragment {
             }
         });
         dialog.show();
+    }
+
+    private void setErrorStyleDisplayedChannelId(String s) {
+        assert getParentFragment() != null;
+        Context context = requireParentFragment().getActivity().getApplicationContext();
+        et_displayed_channel_id.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.red), PorterDuff.Mode.SRC_ATOP);
+        tv_error_displayed_channel_id.setVisibility(View.VISIBLE);
+        tv_error_displayed_channel_id.setText(s);
+    }
+
+    private void setDefaultStyleDisplayedChannelId() {
+        assert getParentFragment() != null;
+        Context context = requireParentFragment().getActivity().getApplicationContext();
+        et_displayed_channel_id.getBackground().mutate().setColorFilter(ContextCompat.getColor(context, R.color.black), PorterDuff.Mode.SRC_ATOP);
+        tv_error_displayed_channel_id.setVisibility(View.INVISIBLE);
+        tv_error_displayed_channel_id.setText("");
     }
 
     private void setErrorStyleLogin(String s) {

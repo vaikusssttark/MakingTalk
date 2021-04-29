@@ -17,6 +17,14 @@ public class UserAdditionalInfo {
     @Expose
     private String userDescription;
 
+    @SerializedName("channel_id")
+    @Expose
+    private String channelId;
+
+    @SerializedName("displayed_channel_id")
+    @Expose
+    private String displayedChannelId;
+
     @SerializedName("success")
     @Expose
     private int success = 1;
@@ -35,6 +43,14 @@ public class UserAdditionalInfo {
 
     public String getUserDescription() {
         return userDescription;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public String getDisplayedChannelId() {
+        return displayedChannelId;
     }
 
     public int getSuccess(){

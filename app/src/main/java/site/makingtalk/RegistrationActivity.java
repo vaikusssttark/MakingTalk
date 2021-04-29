@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -29,7 +30,9 @@ import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.entities.SuccessResponse;
 import site.makingtalk.requests.entities.User;
+import site.makingtalk.requests.entities.UserAdditionalInfo;
 import site.makingtalk.requests.entities.UserPrivacy;
+import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 import site.makingtalk.secondary.AuthSharedPreferences;
 import site.makingtalk.secondary.PrivacySharedPreferences;
 
@@ -143,98 +146,133 @@ public class RegistrationActivity extends AppCompatActivity {
                             final String emailText = emailET.getText().toString();
                             final String pwdText = pwdET.getText().toString();
 
-                            DBHelper.getInstance()
-                                    .getUserMainInfoAPI()
-                                    .getUserByLogin(loginText)
-                                    .enqueue(new Callback<User>() {
-                                        @Override
-                                        public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                                            final User user = response.body();
-                                            assert user != null;
-                                            if (user.getSuccess() == 1) {
-                                                AuthSharedPreferences.savePrefs(user.getUserId(), loginText, emailText, pwdText, getApplicationContext());
-
-                                                DBHelper.getInstance()
-                                                        .getUserAddInfoAPI()
-                                                        .createUserAddInfoRecord(AuthSharedPreferences.getId(getApplicationContext()))
-                                                        .enqueue(new Callback<SuccessResponse>() {
-                                                            @Override
-                                                            public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                                SuccessResponse successResponse = response.body();
-                                                                assert successResponse != null;
-                                                                if (successResponse.getSuccess() != 1) {
-                                                                    Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                                showNoNetworkConnectionDialog();
-                                                            }
-                                                        });
-
-                                                DBHelper.getInstance()
-                                                        .getUserPrivacyAPI()
-                                                        .createPrivacyRecord(user.getUserId())
-                                                        .enqueue(new Callback<SuccessResponse>() {
-                                                            @Override
-                                                            public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
-                                                                SuccessResponse successResponse1 = response.body();
-                                                                assert successResponse1 != null;
-                                                                if (successResponse1.getSuccess() == 1) {
-
-                                                                    DBHelper.getInstance()
-                                                                            .getUserPrivacyAPI()
-                                                                            .getPrivacyById(user.getUserId())
-                                                                            .enqueue(new Callback<UserPrivacy>() {
-                                                                                @Override
-                                                                                public void onResponse(@NonNull Call<UserPrivacy> call, @NonNull Response<UserPrivacy> response) {
-                                                                                    UserPrivacy userPrivacy = response.body();
-                                                                                    assert userPrivacy != null;
-                                                                                    if (userPrivacy.getSuccess() == 1) {
-                                                                                        PrivacySharedPreferences.savePrefs(userPrivacy.getLoginVisibility(),
-                                                                                                userPrivacy.getEmailVisibility(),
-                                                                                                userPrivacy.getNameVisibility(),
-                                                                                                userPrivacy.getDescriptionVisibility(),
-                                                                                                userPrivacy.getProgressVisibility(),
-                                                                                                getApplicationContext());
-                                                                                        Intent intent = new Intent(RegistrationActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                                                        startActivity(intent);
-                                                                                    } else
-                                                                                        Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
-                                                                                }
-
-                                                                                @Override
-                                                                                public void onFailure(@NonNull Call<UserPrivacy> call, @NonNull Throwable t) {
-                                                                                    showNoNetworkConnectionDialog();
-                                                                                }
-                                                                            });
-
-                                                                } else
-                                                                    Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
-                                                                showNoNetworkConnectionDialog();
-                                                            }
-                                                        });
-
-                                            } else
-                                                Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                        @Override
-                                        public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                                            showNoNetworkConnectionDialog();
-                                        }
-                                    });
+                            getUserAndCreateSettings(loginText, emailText, pwdText);
                         } else
                             Toast.makeText(getApplicationContext(), successResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void getUserAndCreateSettings(final String loginText, final String emailText, final String pwdText) {
+        DBHelper.getInstance()
+                .getUserMainInfoAPI()
+                .getUserByLogin(loginText)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                        final User user = response.body();
+                        assert user != null;
+                        if (user.getSuccess() == 1) {
+                            AuthSharedPreferences.savePrefs(user.getUserId(), loginText, emailText, pwdText, getApplicationContext());
+
+                            createAdditionalInfo(user);
+
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void createAdditionalInfo(final User user) {
+        DBHelper.getInstance()
+                .getUserAddInfoAPI()
+                .createUserAddInfoRecord(AuthSharedPreferences.getId(getApplicationContext()))
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        assert response.body() != null;
+                        if (response.body().getSuccess() != 1) {
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД:" + response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            createPrivacySettings(user);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void createPrivacySettings(final User user) {
+        DBHelper.getInstance()
+                .getUserPrivacyAPI()
+                .createPrivacyRecord(user.getUserId())
+                .enqueue(new Callback<SuccessResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SuccessResponse> call, @NonNull Response<SuccessResponse> response) {
+                        SuccessResponse successResponse1 = response.body();
+                        assert successResponse1 != null;
+                        if (successResponse1.getSuccess() == 1) {
+
+                            setPrivacySettings(user);
+
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<SuccessResponse> call, @NonNull Throwable t) {
+                        showNoNetworkConnectionDialog();
+                    }
+                });
+    }
+
+    private void setPrivacySettings(final User user) {
+        DBHelper.getInstance()
+                .getUserPrivacyAPI()
+                .getPrivacyById(user.getUserId())
+                .enqueue(new Callback<UserPrivacy>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserPrivacy> call, @NonNull Response<UserPrivacy> response) {
+                        UserPrivacy userPrivacy = response.body();
+                        assert userPrivacy != null;
+                        if (userPrivacy.getSuccess() == 1) {
+                            PrivacySharedPreferences.savePrefs(userPrivacy.getLoginVisibility(),
+                                    userPrivacy.getEmailVisibility(),
+                                    userPrivacy.getNameVisibility(),
+                                    userPrivacy.getDescriptionVisibility(),
+                                    userPrivacy.getProgressVisibility(),
+                                    getApplicationContext());
+                            DBHelper.getInstance()
+                                    .getUserAddInfoAPI()
+                                    .getUserAddInfoById(user.getUserId())
+                                    .enqueue(new Callback<UserAdditionalInfo>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<UserAdditionalInfo> call, @NonNull Response<UserAdditionalInfo> response) {
+                                            assert response.body() != null;
+                                            if (response.body().getSuccess() == 1) {
+                                                AdditionalInfoSharedPreferences.savePrefs(null, null, response.body().getChannelId(), response.body().getChannelId(), getApplicationContext());
+                                                Intent intent = new Intent(RegistrationActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                startActivity(intent);
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                                                Log.d("myServerError", response.body().getMessage());
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<UserAdditionalInfo> call, @NonNull Throwable t) {
+                                            showNoNetworkConnectionDialog();
+                                        }
+                                    });
+                        } else
+                            Toast.makeText(getApplicationContext(), "Ошибка при запросе к БД", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserPrivacy> call, @NonNull Throwable t) {
                         showNoNetworkConnectionDialog();
                     }
                 });

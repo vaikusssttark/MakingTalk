@@ -14,12 +14,16 @@ public class AdditionalInfoSharedPreferences {
     private static final String ADDITIONAL_INFO_PREFERENCES_DESCRIPTION = "AdditionalInfoPreferencesDescription";
     private static final String ADDITIONAL_INFO_PREFERENCES_LIKED_ARTICLES_IDS = "AdditionalInfoPreferencesLikedArticlesId";
     private static final String ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS = "AdditionalInfoPreferencesViewedArticlesId";
+    private static final String ADDITIONAL_INFO_PREFERENCES_CHANNEL_ID = "AdditionalInfoPreferencesChannelId";
+    private static final String ADDITIONAL_INFO_PREFERENCES_DISPLAYED_CHANNEL_ID = "AdditionalInfoPreferencesDisplayedChannelId";
 
-    public static void savePrefs(String name, String description, Context context) {
+    public static void savePrefs(String name, String description, String channelId, String displayedChannelId, Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_NAME, name);
         editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_DESCRIPTION, description);
+        editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_CHANNEL_ID, channelId);
+        editor.putString(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_DISPLAYED_CHANNEL_ID, displayedChannelId);
         editor.putStringSet(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_LIKED_ARTICLES_IDS, new HashSet<String>());
         editor.putStringSet(AdditionalInfoSharedPreferences.ADDITIONAL_INFO_PREFERENCES_VIEWED_ARTICLES_IDS, new HashSet<String>());
         editor.apply();
@@ -51,6 +55,23 @@ public class AdditionalInfoSharedPreferences {
         SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(ADDITIONAL_INFO_PREFERENCES_DESCRIPTION, description);
+        editor.apply();
+    }
+
+    public static String getChannelId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(ADDITIONAL_INFO_PREFERENCES_CHANNEL_ID, "");
+    }
+
+    public static String getDisplayedChannelId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(ADDITIONAL_INFO_PREFERENCES_DISPLAYED_CHANNEL_ID, "");
+    }
+
+    public static void updateDisplayedChannelId(String channelId, Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ADDITIONAL_INFO_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(ADDITIONAL_INFO_PREFERENCES_DISPLAYED_CHANNEL_ID, channelId);
         editor.apply();
     }
 

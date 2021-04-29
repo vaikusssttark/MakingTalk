@@ -26,6 +26,7 @@ import site.makingtalk.requests.DBHelper;
 import site.makingtalk.requests.NetworkManager;
 import site.makingtalk.requests.entities.Theme;
 import site.makingtalk.requests.entities.Themes;
+import site.makingtalk.secondary.AdditionalInfoSharedPreferences;
 
 public class MainFragment extends Fragment {
 
@@ -43,7 +44,7 @@ public class MainFragment extends Fragment {
 
         DBHelper.getInstance()
                 .getThemesAPI()
-                .getThemes()
+                .getThemesByChannelId(AdditionalInfoSharedPreferences.getDisplayedChannelId(applicationContext))
                 .enqueue(new Callback<Themes>() {
                     @Override
                     public void onResponse(@NonNull Call<Themes> call, @NonNull Response<Themes> response) {

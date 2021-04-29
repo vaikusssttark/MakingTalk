@@ -12,11 +12,19 @@ public class Theme {
     @Expose
     private String themeName;
 
+    @SerializedName("channel_id")
+    @Expose
+    private String channelId;
+
     public int getThemeId() {
         return themeId;
     }
 
     public String getThemeName() {
         return themeName;
+    }
+
+    public String getChannelId() {
+        return channelId;
     }
 }

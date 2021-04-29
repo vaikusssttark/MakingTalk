@@ -11,11 +11,13 @@ public class NetworkManager {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         assert cm != null;
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo.isConnected()) {
+        if (networkInfo == null) {
+            return false;
+        } else if (networkInfo.isConnected()) {
             System.out.println("Connected");
         } else {
             System.out.println("not connected");
         }
-        return networkInfo != null && networkInfo.isConnected();
+        return networkInfo.isConnected();
     }
 }
